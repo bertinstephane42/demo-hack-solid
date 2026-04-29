@@ -1301,7 +1301,7 @@
 	});
 
 	document.getElementById('btnPlan').addEventListener('click', () => {
-		secureRedirect('sitemap');
+		window.location.href = (window.APP_PATH || '') + '/sitemap';
 	});
 	  
 	document.addEventListener("DOMContentLoaded", () => {
