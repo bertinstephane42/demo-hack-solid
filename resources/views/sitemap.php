@@ -16,7 +16,7 @@
                 <small class="text-muted">Cliquez sur un bouton pour naviguer dans le plan du site</small>
             </div>
             <div class="text-center mb-4">
-                <a href="/" class="btn btn-outline-secondary">Retour à l'accueil</a>
+                <a href="<?= asset('') ?>" class="btn btn-outline-secondary">Retour à l'accueil</a>
             </div>
         </a>
     </div>

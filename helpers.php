@@ -87,7 +87,8 @@ function redirect(string $url, int $status = 302): void
 
 function asset(string $path): string
 {
-    return '/' . ltrim($path, '/');
+    $basePath = $_SERVER['APP_BASE_PATH'] ?? '';
+    return $basePath . '/' . ltrim($path, '/');
 }
 
 function old(string $key, mixed $default = null): mixed

@@ -278,7 +278,7 @@
 	(function () {
 		const audio = document.createElement('audio');
 		audio.id = 'hack';
-		audio.src = '/index/sound/binary-code.mp3';
+		audio.src = (window.APP_PATH || '') + '/index/sound/binary-code.mp3';
 		audio.preload = 'auto';
 		document.body.appendChild(audio);
 
@@ -368,7 +368,7 @@
 		let running = false;
 		let soundEnabled = false;
 		
-		const boomSound = new Audio("https://cours-reseaux.fr/index/sound/fireboom.mp3");
+		const boomSound = new Audio((window.APP_PATH || '') + '/index/sound/fireboom.mp3');
 		boomSound.volume = 0.4; // volume raisonnable
 
 		function playFireworkSound() {
@@ -569,7 +569,7 @@
 	// Fonction pour charger le contenu via AJAX
 	async function loadModalContent(modalKey) {
 		try {
-			const response = await fetch('/index/json/data.php', {
+			const response = await fetch((window.APP_PATH || '') + '/api/data', {
 				headers: {
 					'X-Requested-With': 'XMLHttpRequest',
 					'X-Public-Token': '82969263953921582058'
@@ -634,7 +634,7 @@
 	const hackerAudio = document.getElementById("hackerAudio");
 	const backButton = document.getElementById("backButton");
 	let hoverTimer;
-	hackerAudio.src = "https://cours-reseaux.fr/index/sound/hacker-demo.mp3";
+	hackerAudio.src = (window.APP_PATH || '') + '/index/sound/hacker-demo.mp3';
 	let paused = false;
 	let audioStarted = false;
 	let audioElement = null;
@@ -1284,7 +1284,7 @@
 	function secureRedirect(id) {
 		const form = document.createElement('form');
 		form.method = 'POST';
-		form.action = '/index/proxy/page.php';
+		form.action = (window.APP_PATH || '') + '/proxy';
 
 		const input = document.createElement('input');
 		input.type = 'hidden';

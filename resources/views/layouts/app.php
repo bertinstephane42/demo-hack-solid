@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/spacelab/bootstrap.min.css">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/index/css/index.css">
+    <link rel="stylesheet" href="<?= asset('css/index.css') ?>">
 </head>
 <body>
     @include('partials.floating-bg')
@@ -19,7 +19,10 @@
     </main>
     @include('partials.modals')
     @include('partials.footer')
+    <script>
+        window.APP_PATH = '<?= rtrim(asset(''), '/') ?>';
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="/index/js/index.js"></script>
+    <script src="<?= asset('js/index.js') ?>"></script>
 </body>
 </html>

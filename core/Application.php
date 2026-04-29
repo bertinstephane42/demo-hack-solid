@@ -8,6 +8,8 @@ class Application extends Container
 {
     protected string $basePath = '';
 
+    protected string $publicPath = '';
+
     protected array $serviceProviders = [];
 
     protected bool $booted = false;
@@ -38,6 +40,21 @@ class Application extends Container
         $this->instance('path.base', $this->basePath);
 
         return $this;
+    }
+
+    public function setPublicPath(string $path): self
+    {
+        $this->publicPath = \rtrim($path, '\/');
+
+        $this->instance('path.public', $this->publicPath);
+        $_SERVER['APP_BASE_PATH'] = $this->publicPath;
+
+        return $this;
+    }
+
+    public function publicPath(string $path = ''): string
+    {
+        return $this->publicPath . ($path !== '' ? '/' . $path : '');
     }
 
     public function basePath(string $path = ''): string

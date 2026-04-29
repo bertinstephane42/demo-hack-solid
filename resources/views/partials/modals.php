@@ -29,7 +29,7 @@
     <div class="hacker-content">
         <span id="closeSchemaModal" class="schema-close">&times;</span>
         <div style="display:flex; justify-content:center; margin-top:0px;">
-            <img src="/index/img/schema.svg" alt="Schéma de l'infrastructure pédagogique" style="max-width:100%; height:auto; border-radius:6px;">
+            <img src="<?= asset('img/schema.svg') ?>" alt="Schéma de l'infrastructure pédagogique" style="max-width:100%; height:auto; border-radius:6px;">
         </div>
     </div>
 </div>
