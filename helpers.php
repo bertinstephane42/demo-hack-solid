@@ -26,7 +26,14 @@ function loadEnv(string $path): void
         }
         [$key, $value] = explode('=', $line, 2) + [null, null];
         $key = trim($key);
-        $value = trim($value, " \"'");
+        $value = trim($value);
+        if (strlen($value) >= 2) {
+            $first = $value[0];
+            $last = $value[strlen($value) - 1];
+            if (($first === '"' && $last === '"') || ($first === "'" && $last === "'")) {
+                $value = substr($value, 1, -1);
+            }
+        }
         putenv("{$key}={$value}");
         $_ENV[$key] = $value;
         $_SERVER[$key] = $value;
