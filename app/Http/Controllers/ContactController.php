@@ -21,12 +21,18 @@ class ContactController extends Controller
 
     public function show(): string
     {
+        $error = $_SESSION['_contact_error'] ?? null;
+        $success = $_SESSION['_contact_success'] ?? null;
+        $old = $_SESSION['_old'] ?? [];
+
+        unset($_SESSION['_contact_error'], $_SESSION['_contact_success'], $_SESSION['_old']);
+
         return $this->view('contact', [
             'title' => 'Contact — Cours-Réseaux',
             'year' => \date('Y'),
-            'error' => $_SESSION['_contact_error'] ?? null,
-            'success' => $_SESSION['_contact_success'] ?? null,
-            'old' => $_SESSION['_old'] ?? [],
+            'error' => $error,
+            'success' => $success,
+            'old' => $old,
         ], 'layouts/contact');
     }
 
