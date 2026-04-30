@@ -145,9 +145,12 @@
       }catch(e){}
     })();
 	
-	document.getElementById('visitBtn').addEventListener('click', () => {
-	  window.location.href = '/bts_sio/doku.php/start';
-	});
+	const visitBtn = document.getElementById('visitBtn');
+	if (visitBtn) {
+		visitBtn.addEventListener('click', () => {
+			window.location.href = '/bts_sio/doku.php/start';
+		});
+	}
 	
 	(function(){
 	  const words = [
@@ -1301,9 +1304,12 @@
 		secureRedirect('contact');
 	});
 
-	document.getElementById('btnPlan').addEventListener('click', () => {
-		window.location.href = (window.APP_PATH || '') + '/sitemap';
-	});
+	const btnPlan = document.getElementById('btnPlan');
+	if (btnPlan) {
+		btnPlan.addEventListener('click', () => {
+			window.location.href = (window.APP_PATH || '') + '/sitemap';
+		});
+	}
 	  
 	document.addEventListener("DOMContentLoaded", () => {
 		const logo = document.querySelector('.logo-mark');
