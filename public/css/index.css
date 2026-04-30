@@ -67,11 +67,31 @@
 	  }
 	}
 	
+	/* Corrections Spacelab */
+	.card,
+	.feature-card {
+	  border-radius: 6px !important;
+	  box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
+	}
+
 	.navbar,
 	footer,
 	.hero,
 	#miniIDE {
 	  border-radius: 0;
+	}
+
+	/* Couleurs plus Spacelab */
+	:root {
+	  --brand: #3b8cff;
+	}
+
+	.btn-cta {
+	  background: var(--brand) !important;
+	}
+
+	.badge.bg-primary {
+	  background-color: #3b8cff !important;
 	}
 
 	.badge {
@@ -213,7 +233,7 @@
 	  filter: blur(0);
 	}
 
-	/* Animation zigzag + effet léger de rotation “renversant” */
+	/* Animation zigzag + effet léger de rotation "renversant" */
 	@keyframes tooltipZigzag {
 	  0%   { transform: translateX(-50%) translateY(0px) rotate(-1deg); }
 	  25%  { transform: translateX(-48%) translateY(2px) rotate(1deg); }
@@ -346,7 +366,7 @@
 	}
 
 	.subtle-btn:hover {
-		opacity: 0.8;               /* Devient plus visible si l’utilisateur passe la souris */
+		opacity: 0.8;               /* Devient plus visible si l'utilisateur passe la souris */
 	}
 	
 	.mitnick-modal {
@@ -806,10 +826,10 @@ footer {
 }
 
 .logo-mark {
-    width: 64px;
-    height: 64px;
+    width: 72px;
+    height: 72px;
     border-radius: 14px;
-    background: linear-gradient(135deg, #4a8fe7, #2f6fd6);
+    background: linear-gradient(135deg, var(--brand), #2f6fd6);
     display: flex;
     align-items: center;
     justify-content: center;

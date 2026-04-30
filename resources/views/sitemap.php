@@ -1,3 +1,6 @@
+<div class="text-center mb-3">
+    <a href="<?= route('home') ?>" class="btn btn-outline-secondary">Retour à l'accueil</a>
+</div>
 <div class="container mt-3">
     <button class="back-btn" id="backBtn" style="display:none;">← Retour</button>
     <div class="menu-frame-outer mt-3">

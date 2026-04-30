@@ -115,3 +115,17 @@ function csrf_field(): string
 {
     return '<input type="hidden" name="_csrf" value="' . csrf_token() . '">';
 }
+
+function route(string $name, array $params = []): string
+{
+    $basePath = $_SERVER['APP_BASE_PATH'] ?? '';
+    $routes = [
+        'home' => '/',
+        'contact' => '/contact',
+        'sitemap' => '/sitemap',
+        'api.data' => '/api/data',
+        'proxy' => '/proxy',
+    ];
+    $path = $routes[$name] ?? '/';
+    return $basePath . $path;
+}
