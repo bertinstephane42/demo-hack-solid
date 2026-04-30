@@ -65,13 +65,13 @@
             }
         });
         document.addEventListener("DOMContentLoaded", () => {
-            const alertBox = document.querySelector(".alert-danger");
+            const alertBox = document.querySelector(".alert-success, .alert-danger");
             if (alertBox) {
                 setTimeout(() => {
                     alertBox.style.transition = "opacity 0.6s ease";
                     alertBox.style.opacity = "0";
                     setTimeout(() => alertBox.remove(), 600);
-                }, 5000);
+                }, 10000);
             }
         });
     </script>
