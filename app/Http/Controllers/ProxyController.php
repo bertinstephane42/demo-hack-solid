@@ -36,7 +36,7 @@ class ProxyController extends Controller
         }
 
         $routeMap = [
-            'contact' => [ContactController::class, 'show'],
+            'contact' => [ContactController::class, 'submit'],
             'sitemap' => [SitemapController::class, 'index'],
         ];
 

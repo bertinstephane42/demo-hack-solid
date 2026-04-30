@@ -27,7 +27,7 @@ class ContactController extends Controller
             'error' => $_SESSION['_contact_error'] ?? null,
             'success' => $_SESSION['_contact_success'] ?? null,
             'old' => $_SESSION['_old'] ?? [],
-        ]);
+        ], 'layouts/contact');
     }
 
     public function submit(Request $request): void
@@ -56,7 +56,7 @@ class ContactController extends Controller
                 'name' => $request->body('name'),
                 'email' => $request->body('email'),
             ];
-            \header('Location: /contact');
+            \header('Location: ' . route('contact'));
             return;
         }
 
@@ -70,6 +70,6 @@ class ContactController extends Controller
             $_SESSION['_contact_error'] = "L'envoi du message a échoué. Merci de réessayer ultérieurement.";
         }
 
-        \header('Location: /contact');
+        \header('Location: ' . route('contact'));
     }
 }
