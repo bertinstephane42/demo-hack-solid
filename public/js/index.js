@@ -489,16 +489,19 @@
 		});
 	})();
 
+	(function(){
 	// Sélection des éléments
 	const mitnickBtn = document.getElementById('hackerBtn');
 	const mitnickModal = document.getElementById('mitnickModal');
 	const mitnickCloseBtn = document.getElementById('closeMitnick');
+	if (!mitnickBtn || !mitnickModal || !mitnickCloseBtn) return;
 	const mitnickTitle = mitnickModal.querySelector('.mitnick-title');
 	const mitnickStoryContainer = mitnickModal.querySelector('#mitnick-story');
 
 	const helpBtn = document.getElementById('helpBtn');
 	const helpModal = document.getElementById('helpModal');
 	const helpCloseBtn = document.getElementById('closeHelp');
+	if (!helpBtn || !helpModal || !helpCloseBtn) return;
 	const helpTitle = helpModal.querySelector('.hacker-title');
 	const helpTextContainer = helpModal.querySelector('.hacker-text');
 
@@ -623,6 +626,8 @@
 		helpModal.classList.remove('show');
 		document.body.classList.remove('modal-open');
 	});
+
+	})();
 
 	(function(){
 	const badge = document.getElementById("cipherStrike");
@@ -1278,9 +1283,13 @@
 	 });
 	})();
 
-	document.getElementById('btnDoku').addEventListener('click', () => {
+	(function(){
+	const btnDoku = document.getElementById('btnDoku');
+	if (!btnDoku) return;
+	btnDoku.addEventListener('click', () => {
 	  window.location.href = '/bts_sio/doku.php/start';
 	});
+	})();
 	
 	function secureRedirect(id) {
 		const form = document.createElement('form');
@@ -1297,9 +1306,13 @@
 		form.submit();
 	}
 
-	document.getElementById('btnContact').addEventListener('click', () => {
+	(function(){
+	const btnContact = document.getElementById('btnContact');
+	if (!btnContact) return;
+	btnContact.addEventListener('click', () => {
 		secureRedirect('contact');
 	});
+	})();
 
 	const btnPlan = document.getElementById('btnPlan');
 	if (btnPlan) {
@@ -1310,6 +1323,7 @@
 	  
 	document.addEventListener("DOMContentLoaded", () => {
 		const logo = document.querySelector('.logo-mark');
+		if (!logo) return;
 		logo.addEventListener('click', () => {
 			logo.classList.toggle('show-tux');
 			console.log("Classe .show-tux ajoutée ? →", logo.classList.contains('show-tux'));
@@ -1317,6 +1331,7 @@
 		const openBtn = document.getElementById("openSchemaBtn");
 		const modal = document.getElementById("schemaModal");
 		const closeBtn = document.getElementById("closeSchemaModal");
+		if (!openBtn || !modal || !closeBtn) return;
 
 		// Ouverture
 		openBtn.addEventListener("click", () => {
