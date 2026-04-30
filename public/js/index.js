@@ -162,7 +162,8 @@
 	  ];
 
 	  const container = document.getElementById("wordCloudInner");
-	  container.innerHTML = ''; 
+	  if (!container) return;
+	  container.innerHTML = '';
 	  const containerWidth = container.clientWidth;
 	  const containerHeight = container.clientHeight;
 
@@ -266,19 +267,7 @@
 		setTimeout(() => logo.classList.remove('show-tux'), 1300);
 	  });
 	})();
-	
-	  const logo = document.querySelector('.logo-mark');
-	  logo.addEventListener('mouseenter', () => {
-		logo.classList.add('show-tux');
-	  });
-	  logo.addEventListener('mouseleave', () => {
-		logo.classList.remove('show-tux');
-	  });
-	  
-	  document.querySelector('.logo-mark').addEventListener('click', () => {
-			document.querySelector('.logo-mark').classList.toggle('show-tux');
-		});
-	
+
 	(function () {
 		const audio = document.createElement('audio');
 		audio.id = 'hack';
@@ -287,6 +276,7 @@
 		document.body.appendChild(audio);
 
 		const tuxChip = document.querySelector('.tech-chip[title="Web"]');
+		if (!tuxChip) return;
 
 		let audioUnlocked = false;
 		let alertShown = false;
@@ -351,7 +341,8 @@
 	
 	(function(){
 	  const el = document.getElementById('search');
-	  
+	  if (!el) return;
+
 	  setInterval(() => {
 		const dy = (Math.random() - 0.5) * 2; // -1 à 1 px
 		el.style.transform = `translateY(${dy}px)`;
@@ -634,6 +625,7 @@
 	});
 	
 	const badge = document.getElementById("cipherStrike");
+	if (!badge) return;
 	const modal = document.getElementById("hackerModal");
 	const hackerAudio = document.getElementById("hackerAudio");
 	const backButton = document.getElementById("backButton");
@@ -1265,6 +1257,7 @@
 	}
 	
 	const progressContainer = document.querySelector('.progress');
+	if (!progressContainer) return;
 	const progressBar = progressContainer.querySelector('.progress-bar');
 
 	progressContainer.addEventListener('mousemove', (e) => {
