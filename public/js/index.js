@@ -28,6 +28,7 @@
     // Mini console animation
     (function(){
 	  const consoleEl = document.getElementById('console');
+	  if (!consoleEl) return;
 	  const lines = [
 		"[info] Initialisation des environnements pédagogiques...",
 		"[ok] Proxy applicatif démarré — isolation: ON",
