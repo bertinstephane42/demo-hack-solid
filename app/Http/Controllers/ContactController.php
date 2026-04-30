@@ -56,8 +56,8 @@ class ContactController extends Controller
                 'name' => $request->body('name'),
                 'email' => $request->body('email'),
             ];
-            \header('Location: ' . route('contact'));
-            return;
+            Response::redirect(route('contact'))->send();
+            exit;
         }
 
         $name = \trim($request->body('name'));
@@ -70,6 +70,7 @@ class ContactController extends Controller
             $_SESSION['_contact_error'] = "L'envoi du message a échoué. Merci de réessayer ultérieurement.";
         }
 
-        \header('Location: ' . route('contact'));
+        Response::redirect(route('contact'))->send();
+        exit;
     }
 }
