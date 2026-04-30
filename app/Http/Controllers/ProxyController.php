@@ -49,6 +49,6 @@ class ProxyController extends Controller
         [$controllerClass, $method] = $routeMap[$id];
         $container = \Core\Container::getInstance();
         $controller = $container->make($controllerClass);
-        $controller->$method();
+        $controller->$method($request);
     }
 }

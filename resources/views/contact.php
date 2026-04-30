@@ -6,9 +6,7 @@
             <?php elseif ($error): ?>
                 <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
-            <form action="/proxy" method="POST">
-                <input type="hidden" name="id" value="contact">
-                <input type="hidden" name="form_submitted" value="1">
+            <form action="<?= route('contact') ?>" method="POST">
                 <div class="form-floating mb-3">
                     <input type="text" name="name" class="form-control" id="nameInput" placeholder="Votre nom" required value="<?= htmlspecialchars($old['name'] ?? '') ?>">
                     <label for="nameInput">Votre nom et prénom</label>
