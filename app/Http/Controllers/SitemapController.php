@@ -20,6 +20,6 @@ class SitemapController extends Controller
             'title' => 'Plan du site cours-reseaux.fr',
             'year' => \date('Y'),
             'menu' => $this->menu,
-        ]);
+        ], 'layouts/sitemap');
     }
 }

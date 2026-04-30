@@ -353,6 +353,7 @@
 		const footer = document.querySelector('footer');
 		const canvas = document.getElementById('fireworks-canvas');
 		const hint = document.getElementById('fireworks-hint');
+		if (!footer || !canvas || !hint) return;
 		hint.textContent = "Cliquez pour activer le son des explosions";
 		let hintTimer;
 		const ctx = canvas.getContext('2d');
@@ -635,6 +636,7 @@
 	const modal = document.getElementById("hackerModal");
 	const hackerAudio = document.getElementById("hackerAudio");
 	const backButton = document.getElementById("backButton");
+	if (!modal || !hackerAudio || !backButton) return;
 	let hoverTimer;
 	hackerAudio.src = (window.APP_PATH || '') + '/index/sound/hacker-demo.mp3';
 	let paused = false;
@@ -1291,29 +1293,6 @@
 	});
 	})();
 	
-	function secureRedirect(id) {
-		const form = document.createElement('form');
-		form.method = 'POST';
-		form.action = (window.APP_PATH || '') + '/proxy';
-
-		const input = document.createElement('input');
-		input.type = 'hidden';
-		input.name = 'id';
-		input.value = id;
-
-		form.appendChild(input);
-		document.body.appendChild(form);
-		form.submit();
-	}
-
-	(function(){
-	const btnContact = document.getElementById('btnContact');
-	if (!btnContact) return;
-	btnContact.addEventListener('click', () => {
-		secureRedirect('contact');
-	});
-	})();
-
 	const btnPlan = document.getElementById('btnPlan');
 	if (btnPlan) {
 		btnPlan.addEventListener('click', () => {

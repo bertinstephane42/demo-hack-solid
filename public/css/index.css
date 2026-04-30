@@ -631,7 +631,7 @@ footer {
     gap: 1rem;
 }
 
-.feature-card {
+.menu-frame-outer .feature-card {
     background: var(--brand);
     border-radius: 14px;
     color: white;
@@ -643,7 +643,12 @@ footer {
     text-align: center;
 }
 
-.feature-card-disabled {
+.menu-frame-outer .feature-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(30,70,120,0.12);
+}
+
+.menu-frame-outer .feature-card-disabled {
     background: rgba(74,143,231,0.35);
     color: white;
     border-radius: 14px;

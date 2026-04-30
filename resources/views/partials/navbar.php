@@ -12,7 +12,7 @@
         </a>
         <div class="d-flex gap-2">
             <button class="btn btn-outline-primary" id="btnDoku">Accéder au DokuWiki</button>
-            <button class="btn btn-outline-secondary" id="btnContact">Contact</button>
+            <a href="<?= route('contact') ?>" class="btn btn-outline-secondary">Contact</a>
             <button id="helpBtn" class="btn btn-outline-primary px-3 py-2 shadow-sm" style="border-width:2px; font-weight:600; letter-spacing:0.5px;">
                 <span style="font-family:monospace;">Aide</span>
             </button>
