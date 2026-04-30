@@ -1,4 +1,4 @@
-<footer class="bg-light py-4 mt-5 border-top">
+<footer class="bg-light py-4 border-top">
     <div class="container d-flex justify-content-between align-items-center">
         <div>
             <a href="https://www.linkedin.com/in/stephane-bertin42/" target="_blank" rel="noopener noreferrer">

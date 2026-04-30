@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('css/index.css') ?>">
 </head>
-<body>
+<body class="d-flex flex-column">
     @include('partials.floating-bg')
     @include('partials.navbar')
     <main>

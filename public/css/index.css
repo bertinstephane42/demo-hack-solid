@@ -68,8 +68,7 @@
 	}
 	
 	/* Corrections Spacelab */
-	.card,
-	.feature-card {
+	.card {
 	  border-radius: 6px !important;
 	  box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
 	}
@@ -605,8 +604,6 @@
 
 body {
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
     background: linear-gradient(180deg, #eef4fa 0%, #f7faff 100%);
 }
 
