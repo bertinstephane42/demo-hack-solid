@@ -28,6 +28,7 @@
     // Mini console animation
     (function(){
 	  const consoleEl = document.getElementById('console');
+	  if (!consoleEl) return;
 	  const lines = [
 		"[info] Initialisation des environnements pédagogiques...",
 		"[ok] Proxy applicatif démarré — isolation: ON",
@@ -144,9 +145,12 @@
       }catch(e){}
     })();
 	
-	document.getElementById('visitBtn').addEventListener('click', () => {
-	  window.location.href = '/bts_sio/doku.php/start';
-	});
+	const visitBtn = document.getElementById('visitBtn');
+	if (visitBtn) {
+		visitBtn.addEventListener('click', () => {
+			window.location.href = '/bts_sio/doku.php/start';
+		});
+	}
 	
 	(function(){
 	  const words = [
@@ -158,7 +162,8 @@
 	  ];
 
 	  const container = document.getElementById("wordCloudInner");
-	  container.innerHTML = ''; 
+	  if (!container) return;
+	  container.innerHTML = '';
 	  const containerWidth = container.clientWidth;
 	  const containerHeight = container.clientHeight;
 
@@ -262,19 +267,7 @@
 		setTimeout(() => logo.classList.remove('show-tux'), 1300);
 	  });
 	})();
-	
-	  const logo = document.querySelector('.logo-mark');
-	  logo.addEventListener('mouseenter', () => {
-		logo.classList.add('show-tux');
-	  });
-	  logo.addEventListener('mouseleave', () => {
-		logo.classList.remove('show-tux');
-	  });
-	  
-	  document.querySelector('.logo-mark').addEventListener('click', () => {
-			document.querySelector('.logo-mark').classList.toggle('show-tux');
-		});
-	
+
 	(function () {
 		const audio = document.createElement('audio');
 		audio.id = 'hack';
@@ -283,6 +276,7 @@
 		document.body.appendChild(audio);
 
 		const tuxChip = document.querySelector('.tech-chip[title="Web"]');
+		if (!tuxChip) return;
 
 		let audioUnlocked = false;
 		let alertShown = false;
@@ -347,7 +341,8 @@
 	
 	(function(){
 	  const el = document.getElementById('search');
-	  
+	  if (!el) return;
+
 	  setInterval(() => {
 		const dy = (Math.random() - 0.5) * 2; // -1 à 1 px
 		el.style.transform = `translateY(${dy}px)`;
@@ -494,16 +489,19 @@
 		});
 	})();
 
+	(function(){
 	// Sélection des éléments
 	const mitnickBtn = document.getElementById('hackerBtn');
 	const mitnickModal = document.getElementById('mitnickModal');
 	const mitnickCloseBtn = document.getElementById('closeMitnick');
+	if (!mitnickBtn || !mitnickModal || !mitnickCloseBtn) return;
 	const mitnickTitle = mitnickModal.querySelector('.mitnick-title');
 	const mitnickStoryContainer = mitnickModal.querySelector('#mitnick-story');
 
 	const helpBtn = document.getElementById('helpBtn');
 	const helpModal = document.getElementById('helpModal');
 	const helpCloseBtn = document.getElementById('closeHelp');
+	if (!helpBtn || !helpModal || !helpCloseBtn) return;
 	const helpTitle = helpModal.querySelector('.hacker-title');
 	const helpTextContainer = helpModal.querySelector('.hacker-text');
 
@@ -628,8 +626,12 @@
 		helpModal.classList.remove('show');
 		document.body.classList.remove('modal-open');
 	});
-	
+
+	})();
+
+	(function(){
 	const badge = document.getElementById("cipherStrike");
+	if (!badge) return;
 	const modal = document.getElementById("hackerModal");
 	const hackerAudio = document.getElementById("hackerAudio");
 	const backButton = document.getElementById("backButton");
@@ -1259,8 +1261,11 @@
 		// Démarrage de la boucle
 		loop();
 	}
-	
+	})();
+
+	(function(){
 	const progressContainer = document.querySelector('.progress');
+	if (!progressContainer) return;
 	const progressBar = progressContainer.querySelector('.progress-bar');
 
 	progressContainer.addEventListener('mousemove', (e) => {
@@ -1276,10 +1281,15 @@
 	progressContainer.addEventListener('mouseleave', () => {
 		progressBar.style.width = '72%';
 	 });
-	
-	document.getElementById('btnDoku').addEventListener('click', () => {
+	})();
+
+	(function(){
+	const btnDoku = document.getElementById('btnDoku');
+	if (!btnDoku) return;
+	btnDoku.addEventListener('click', () => {
 	  window.location.href = '/bts_sio/doku.php/start';
 	});
+	})();
 	
 	function secureRedirect(id) {
 		const form = document.createElement('form');
@@ -1296,16 +1306,24 @@
 		form.submit();
 	}
 
-	document.getElementById('btnContact').addEventListener('click', () => {
+	(function(){
+	const btnContact = document.getElementById('btnContact');
+	if (!btnContact) return;
+	btnContact.addEventListener('click', () => {
 		secureRedirect('contact');
 	});
+	})();
 
-	document.getElementById('btnPlan').addEventListener('click', () => {
-		window.location.href = (window.APP_PATH || '') + '/sitemap';
-	});
+	const btnPlan = document.getElementById('btnPlan');
+	if (btnPlan) {
+		btnPlan.addEventListener('click', () => {
+			window.location.href = (window.APP_PATH || '') + '/sitemap';
+		});
+	}
 	  
 	document.addEventListener("DOMContentLoaded", () => {
 		const logo = document.querySelector('.logo-mark');
+		if (!logo) return;
 		logo.addEventListener('click', () => {
 			logo.classList.toggle('show-tux');
 			console.log("Classe .show-tux ajoutée ? →", logo.classList.contains('show-tux'));
@@ -1313,6 +1331,7 @@
 		const openBtn = document.getElementById("openSchemaBtn");
 		const modal = document.getElementById("schemaModal");
 		const closeBtn = document.getElementById("closeSchemaModal");
+		if (!openBtn || !modal || !closeBtn) return;
 
 		// Ouverture
 		openBtn.addEventListener("click", () => {
