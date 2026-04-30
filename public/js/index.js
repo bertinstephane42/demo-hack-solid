@@ -623,7 +623,8 @@
 		helpModal.classList.remove('show');
 		document.body.classList.remove('modal-open');
 	});
-	
+
+	(function(){
 	const badge = document.getElementById("cipherStrike");
 	if (!badge) return;
 	const modal = document.getElementById("hackerModal");
@@ -1255,7 +1256,9 @@
 		// Démarrage de la boucle
 		loop();
 	}
-	
+	})();
+
+	(function(){
 	const progressContainer = document.querySelector('.progress');
 	if (!progressContainer) return;
 	const progressBar = progressContainer.querySelector('.progress-bar');
@@ -1273,7 +1276,8 @@
 	progressContainer.addEventListener('mouseleave', () => {
 		progressBar.style.width = '72%';
 	 });
-	
+	})();
+
 	document.getElementById('btnDoku').addEventListener('click', () => {
 	  window.location.href = '/bts_sio/doku.php/start';
 	});
