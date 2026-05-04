@@ -2,7 +2,6 @@
 
 // Core framework
 require_once __DIR__ . '/../core/Container.php';
-require_once __DIR__ . '/../core/Facade.php';
 require_once __DIR__ . '/../core/Request.php';
 require_once __DIR__ . '/../core/Response.php';
 require_once __DIR__ . '/../core/Route.php';
@@ -38,7 +37,6 @@ require_once __DIR__ . '/../app/Http/Controllers/ApiController.php';
 $app = new Core\Application(__DIR__ . '/../');
 
 Core\Container::setInstance($app);
-Core\Facade::setApplication($app);
 
 // Bootstrap service providers
 $providers = config('app.providers');

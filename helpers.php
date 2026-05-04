@@ -86,34 +86,10 @@ function view(string $name = null, array $data = []): Core\View
     return Core\View::make($name ?? '', $data);
 }
 
-function redirect(string $url, int $status = 302): void
-{
-    header("Location: {$url}", true, $status);
-    exit;
-}
-
 function asset(string $path): string
 {
     $basePath = $_SERVER['APP_BASE_PATH'] ?? '';
     return $basePath . '/' . ltrim($path, '/');
-}
-
-function old(string $key, mixed $default = null): mixed
-{
-    return $_SESSION['_old'][$key] ?? $default;
-}
-
-function csrf_token(): string
-{
-    if (empty($_SESSION['_csrf'])) {
-        $_SESSION['_csrf'] = bin2hex(random_bytes(32));
-    }
-    return $_SESSION['_csrf'];
-}
-
-function csrf_field(): string
-{
-    return '<input type="hidden" name="_csrf" value="' . csrf_token() . '">';
 }
 
 function route(string $name, array $params = []): string

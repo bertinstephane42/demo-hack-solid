@@ -8,7 +8,6 @@ Réécriture complète de l'application pédagogique cours-reseaux.fr suivant le
 ├── core/                    # Framework kernel
 │   ├── Container.php        # Service Container (DI)
 │   ├── Application.php      # Application principale
-│   ├── Facade.php           # Base Facade
 │   ├── Request.php          # HTTP Request
 │   ├── Response.php         # HTTP Response factory
 │   ├── Router.php           # Routeur avec groupes
@@ -42,7 +41,6 @@ Réécriture complète de l'application pédagogique cours-reseaux.fr suivant le
 | **Repository** | `SitemapMenu` — accès aux données du plan du site |
 | **Strategy** | Chaque Middleware implémente la même interface |
 | **Template Method** | `View.php` — rendu avec layouts et partials |
-| **Facade** | Accès statique aux services (`Config::get()`, etc.) |
 | **Factory** | `Response::json()`, `Response::redirect()` |
 
 ## SOLID
