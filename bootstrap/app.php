@@ -33,7 +33,6 @@ require_once __DIR__ . '/../app/Http/Controllers/HomeController.php';
 require_once __DIR__ . '/../app/Http/Controllers/ContactController.php';
 require_once __DIR__ . '/../app/Http/Controllers/SitemapController.php';
 require_once __DIR__ . '/../app/Http/Controllers/ApiController.php';
-require_once __DIR__ . '/../app/Http/Controllers/ProxyController.php';
 
 // Create application
 $app = new Core\Application(__DIR__ . '/../');

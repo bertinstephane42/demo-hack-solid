@@ -68,7 +68,6 @@ Réécriture complète de l'application pédagogique cours-reseaux.fr suivant le
 | POST | `/contact` | ContactController@submit | Envoi du formulaire |
 | GET | `/sitemap` | SitemapController@index | Plan du site |
 | GET | `/api/data` | ApiController@modalData | Données modales (AJAX) |
-| POST | `/proxy` | ProxyController@route | Routing proxy (legacy compat) |
 
 ## Comparaison avant/après
 

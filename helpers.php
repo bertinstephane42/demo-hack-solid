@@ -124,7 +124,6 @@ function route(string $name, array $params = []): string
         'contact' => '/contact',
         'sitemap' => '/sitemap',
         'api.data' => '/api/data',
-        'proxy' => '/proxy',
     ];
     $path = $routes[$name] ?? '/';
     return $basePath . $path;
