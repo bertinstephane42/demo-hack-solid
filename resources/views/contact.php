@@ -7,6 +7,12 @@
                 <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
             <form action="<?= route('contact') ?>" method="POST">
+                <input type="hidden" name="_token" value="<?= htmlspecialchars($form_token) ?>">
+                <input type="hidden" name="_time" value="<?= (int) $form_time ?>">
+                <div style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden" aria-hidden="true">
+                    <label for="websiteInput">Laissez ce champ vide</label>
+                    <input type="text" name="website" id="websiteInput" tabindex="-1" autocomplete="off">
+                </div>
                 <div class="form-floating mb-3">
                     <input type="text" name="name" class="form-control" id="nameInput" placeholder="Votre nom" required value="<?= htmlspecialchars($old['name'] ?? '') ?>">
                     <label for="nameInput">Votre nom et prénom</label>
