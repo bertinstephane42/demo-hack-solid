@@ -14,15 +14,19 @@
                     <input type="text" name="website" id="websiteInput" tabindex="-1" autocomplete="off">
                 </div>
                 <div class="form-floating mb-3">
-                    <input type="text" name="name" class="form-control" id="nameInput" placeholder="Votre nom" required value="<?= htmlspecialchars($old['name'] ?? '') ?>">
+                    <input type="text" name="name" class="form-control" id="nameInput" placeholder="Votre nom" required minlength="6" value="<?= htmlspecialchars($old['name'] ?? '') ?>">
                     <label for="nameInput">Votre nom et prénom</label>
                 </div>
                 <div class="form-floating mb-3">
                     <input type="email" name="email" class="form-control" id="emailInput" placeholder="Votre email" required value="<?= htmlspecialchars($old['email'] ?? '') ?>">
                     <label for="emailInput">Votre email</label>
                 </div>
+                <div class="mb-4">
+                    <label for="captchaInput" class="form-label">Combien font <?= (int) $captcha_a ?> + <?= (int) $captcha_b ?> ?</label>
+                    <input type="text" name="captcha" class="form-control" id="captchaInput" inputmode="numeric" autocomplete="off" required>
+                </div>
                 <div class="form-floating mb-4">
-                    <textarea name="message" class="form-control" id="messageInput" placeholder="Votre message" style="height:160px" required></textarea>
+                    <textarea name="message" class="form-control" id="messageInput" placeholder="Votre message" style="height:160px" required minlength="7"></textarea>
                     <label for="messageInput">Votre message</label>
                 </div>
                 <div class="text-center">
