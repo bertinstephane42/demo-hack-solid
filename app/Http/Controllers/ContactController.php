@@ -32,6 +32,10 @@ class ContactController extends Controller
         $_SESSION['_contact_token'] = $formToken;
         $_SESSION['_contact_time'] = $formTime;
 
+        $captchaA = \random_int(1, 9);
+        $captchaB = \random_int(1, 9);
+        $_SESSION['_contact_captcha'] = $captchaA + $captchaB;
+
         return $this->view('contact', [
             'title' => 'Contact — Cours-Réseaux',
             'year' => \date('Y'),
@@ -40,6 +44,8 @@ class ContactController extends Controller
             'old' => $old,
             'form_token' => $formToken,
             'form_time' => $formTime,
+            'captcha_a' => $captchaA,
+            'captcha_b' => $captchaB,
         ], 'layouts/contact');
     }
 
@@ -49,16 +55,19 @@ class ContactController extends Controller
 
         $sessionToken = $_SESSION['_contact_token'] ?? null;
         $sessionTime = (int) ($_SESSION['_contact_time'] ?? 0);
-        unset($_SESSION['_contact_token'], $_SESSION['_contact_time']);
+        $sessionCaptcha = $_SESSION['_contact_captcha'] ?? null;
+        unset($_SESSION['_contact_token'], $_SESSION['_contact_time'], $_SESSION['_contact_captcha']);
 
         $token = $request->body('_token');
         $time = (int) $request->body('_time', 0);
         $honeypot = $request->body('website');
+        $captchaAnswer = $request->body('captcha');
 
         $validToken = ($token !== null && \hash_equals((string) $sessionToken, (string) $token));
         $elapsed = \time() - $sessionTime;
         $timingOk = $sessionTime > 0 && $elapsed >= 3;
-        $isHuman = $validToken && $timingOk && trim((string) $honeypot) === '';
+        $validCaptcha = ($sessionCaptcha !== null && (int) $captchaAnswer === (int) $sessionCaptcha);
+        $isHuman = $validToken && $timingOk && trim((string) $honeypot) === '' && $validCaptcha;
 
         if (!$isHuman) {
             $_SESSION['_contact_success'] = true;
@@ -73,9 +82,9 @@ class ContactController extends Controller
                 'message' => $request->body('message'),
             ],
             [
-                'name' => 'required',
+                'name' => 'required|min:6',
                 'email' => 'required|email',
-                'message' => 'required',
+                'message' => 'required|min:7',
             ]
         );
 
