@@ -67,10 +67,16 @@ class ContactController extends Controller
         $elapsed = \time() - $sessionTime;
         $timingOk = $sessionTime > 0 && $elapsed >= 3;
         $validCaptcha = ($sessionCaptcha !== null && (int) $captchaAnswer === (int) $sessionCaptcha);
-        $isHuman = $validToken && $timingOk && trim((string) $honeypot) === '' && $validCaptcha;
+        $isHuman = $validToken && $timingOk && trim((string) $honeypot) === '';
 
         if (!$isHuman) {
             $_SESSION['_contact_success'] = true;
+            Response::redirect(route('contact'))->send();
+            exit;
+        }
+
+        if (!$validCaptcha) {
+            $_SESSION['_contact_error'] = 'Le résultat du calcul est incorrect. Votre message n\'a pas été envoyé, merci de réessayer.';
             Response::redirect(route('contact'))->send();
             exit;
         }
