@@ -34,6 +34,14 @@ class ContactController extends Controller
 
         $captchaA = \random_int(1, 9);
         $captchaB = \random_int(1, 9);
+        $lastA = $_SESSION['_contact_captcha_op_a'] ?? null;
+        $lastB = $_SESSION['_contact_captcha_op_b'] ?? null;
+        while ($captchaA === $lastA && $captchaB === $lastB) {
+            $captchaA = \random_int(1, 9);
+            $captchaB = \random_int(1, 9);
+        }
+        $_SESSION['_contact_captcha_op_a'] = $captchaA;
+        $_SESSION['_contact_captcha_op_b'] = $captchaB;
         $_SESSION['_contact_captcha'] = $captchaA + $captchaB;
 
         return $this->view('contact', [
