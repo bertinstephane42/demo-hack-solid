@@ -43,9 +43,7 @@
     <footer class="bg-light py-4 border-top">
         <div class="container d-flex justify-content-between align-items-center">
             <div>
-                <a href="https://www.linkedin.com/in/stephane-bertin42/" target="_blank" rel="noopener noreferrer">
-                    <strong>Stéphane BERTIN</strong>
-                </a><br>
+                <span id="linkedin-name" class="linkedin-profile"><strong>Stéphane BERTIN</strong></span><br>
                 <small class="text-muted">&copy; <?= $year ?? date('Y') ?> — Ressources pédagogiques informatiques</small>
             </div>
             <div class="text-end">
@@ -53,6 +51,16 @@
             </div>
         </div>
     </footer>
+    <script>
+        (function () {
+            var parts = ["s", "t", "e", "p", "h", "a", "n", "e", "-", "b", "e", "r", "t", "i", "n", "4", "2"];
+            var el = document.getElementById("linkedin-name");
+            if (el) {
+                var username = parts.join("");
+                el.innerHTML = '<a href="https://www.linkedin.com/in/' + username + '/" target="_blank" rel="noopener noreferrer"><strong>Stéphane BERTIN</strong></a>';
+            }
+        })();
+    </script>
     <script>
         document.addEventListener("contextmenu", event => event.preventDefault());
         document.addEventListener("keydown", function (e) {
