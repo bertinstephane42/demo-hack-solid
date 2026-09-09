@@ -27,18 +27,44 @@ class ContactController extends Controller
 
         unset($_SESSION['_contact_error'], $_SESSION['_contact_success'], $_SESSION['_old']);
 
+        $formToken = \bin2hex(\random_bytes(16));
+        $formTime = \time();
+        $_SESSION['_contact_token'] = $formToken;
+        $_SESSION['_contact_time'] = $formTime;
+
         return $this->view('contact', [
             'title' => 'Contact — Cours-Réseaux',
             'year' => \date('Y'),
             'error' => $error,
             'success' => $success,
             'old' => $old,
+            'form_token' => $formToken,
+            'form_time' => $formTime,
         ], 'layouts/contact');
     }
 
     public function submit(Request $request): void
     {
         unset($_SESSION['_contact_error'], $_SESSION['_contact_success'], $_SESSION['_old']);
+
+        $sessionToken = $_SESSION['_contact_token'] ?? null;
+        $sessionTime = (int) ($_SESSION['_contact_time'] ?? 0);
+        unset($_SESSION['_contact_token'], $_SESSION['_contact_time']);
+
+        $token = $request->body('_token');
+        $time = (int) $request->body('_time', 0);
+        $honeypot = $request->body('website');
+
+        $validToken = ($token !== null && \hash_equals((string) $sessionToken, (string) $token));
+        $elapsed = \time() - $sessionTime;
+        $timingOk = $sessionTime > 0 && $elapsed >= 3;
+        $isHuman = $validToken && $timingOk && trim((string) $honeypot) === '';
+
+        if (!$isHuman) {
+            $_SESSION['_contact_success'] = true;
+            Response::redirect(route('contact'))->send();
+            exit;
+        }
 
         $validated = $this->validator->validate(
             [
