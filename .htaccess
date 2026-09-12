@@ -1,0 +1,21 @@
+Options -Indexes
+
+<FilesMatch "^\.(htaccess|htpasswd|env.*|git.*)$">
+    Require all denied
+</FilesMatch>
+
+FallbackResource /public/index.php
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    RewriteRule ^\.env$ - [F,L]
+    RewriteRule ^helpers\.php$ - [F,L]
+    RewriteRule ^(app|bootstrap|config|core|resources|routes|storage)(/|$) - [F,L]
+    RewriteRule ^(?!robots\.txt$).*\.(txt|md|log|bak|old|sql|sqlite)$ - [F,L]
+    RewriteRule ^(README|LICENSE|CHANGELOG).*$ - [F,L]
+</IfModule>

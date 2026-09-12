@@ -104,3 +104,25 @@ function route(string $name, array $params = []): string
     $path = $routes[$name] ?? '/';
     return $basePath . $path;
 }
+
+/**
+ * Sauvegarde systématique d'une demande (contact) : même si l'envoi du mail
+ * échoue, la demande n'est jamais perdue (storage/logs/contact.log,
+ * inaccessible via HTTP grâce au .htaccess de storage/).
+ */
+function backup_contact_request(array $record): void
+{
+    $record['at'] = $record['at'] ?? date('Y-m-d H:i:s');
+
+    $line = json_encode($record, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($line === false) {
+        return;
+    }
+
+    $dir = __DIR__ . '/storage/logs';
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0775, true);
+    }
+
+    @file_put_contents($dir . '/contact.log', $line . "\n", FILE_APPEND | LOCK_EX);
+}
