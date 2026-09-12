@@ -75,10 +75,24 @@ class ContactController extends Controller
         $elapsed = \time() - $sessionTime;
         $timingOk = $sessionTime > 0 && $elapsed >= 3;
         $validCaptcha = ($sessionCaptcha !== null && (int) $captchaAnswer === (int) $sessionCaptcha);
-        $isHuman = $validToken && $timingOk && trim((string) $honeypot) === '';
+        $isBot = trim((string) $honeypot) !== '';
+        $isHuman = $validToken && $timingOk && !$isBot;
+
+        $this->logContact(sprintf(
+            'gate token=%s elapsed=%ds honeypot=%s captcha=%s human=%s',
+            $validToken ? 'ok' : 'fail',
+            $elapsed,
+            $isBot ? 'filled' : 'empty',
+            $validCaptcha ? 'ok' : 'fail',
+            $isHuman ? 'yes' : 'no'
+        ));
 
         if (!$isHuman) {
-            $_SESSION['_contact_success'] = true;
+            if ($isBot) {
+                $_SESSION['_contact_success'] = true;
+            } else {
+                $_SESSION['_contact_error'] = 'Votre session a expiré. Merci de recharger la page et de réessayer.';
+            }
             Response::redirect(route('contact'))->send();
             exit;
         }
@@ -88,6 +102,9 @@ class ContactController extends Controller
             Response::redirect(route('contact'))->send();
             exit;
         }
+
+        $copyRequested = (bool) $request->body('copy');
+        $copyEmail = \trim((string) $request->body('copy_email'));
 
         $validated = $this->validator->validate(
             [
@@ -110,16 +127,62 @@ class ContactController extends Controller
             $_SESSION['_old'] = [
                 'name' => $request->body('name'),
                 'email' => $request->body('email'),
+                'copy' => $copyRequested,
+                'copy_email' => $copyEmail,
             ];
             Response::redirect(route('contact'))->send();
             exit;
+        }
+
+        if ($copyRequested) {
+            $copyValidated = $this->validator->validate(
+                ['copy_email' => $copyEmail],
+                ['copy_email' => 'required|email']
+            );
+            if (!$copyValidated) {
+                $_SESSION['_contact_error'] = 'Pour recevoir une copie, renseignez une adresse mail valide.';
+                $_SESSION['_old'] = [
+                    'name' => $request->body('name'),
+                    'email' => $request->body('email'),
+                    'copy' => true,
+                    'copy_email' => $copyEmail,
+                ];
+                Response::redirect(route('contact'))->send();
+                exit;
+            }
         }
 
         $name = \trim($request->body('name'));
         $email = \trim($request->body('email'));
         $message = \trim($request->body('message'));
 
-        if ($this->mailer->contact($name, $email, $message)) {
+        $copyRelation = null;
+        if ($copyRequested) {
+            $copyRelation = \strcasecmp($copyEmail, $email) === 0 ? 'same' : 'different';
+        }
+
+        $sent = $this->mailer->contact($name, $email, $message, $copyRequested ? $copyEmail : null);
+        $this->logContact('mail result=' . var_export($sent, true)
+            . ' error=' . $this->mailer->lastError
+            . ' to=' . config('mail.to', 'contact@cours-reseaux.fr')
+            . ' from=' . config('mail.from', 'contact@cours-reseaux.fr')
+            . ' copy=' . ($copyRequested ? 'yes' : 'no')
+            . ($copyRequested ? ' copy_relation=' . $copyRelation . ' copy_email=' . $copyEmail : ''));
+
+        // Sauvegarde systématique (même en cas d'échec d'envoi) : la demande
+        // n'est jamais perdue (storage/logs/contact.log, inaccessible via HTTP).
+        backup_contact_request([
+            'type' => 'contact',
+            'name' => $name,
+            'email' => $email,
+            'message' => $message,
+            'copy' => $copyRequested,
+            'copy_email' => $copyRequested ? $copyEmail : null,
+            'mail' => $sent ? 'sent' : 'failed',
+            'error' => $sent ? '' : $this->mailer->lastError,
+        ]);
+
+        if ($sent) {
             $_SESSION['_contact_success'] = true;
         } else {
             $_SESSION['_contact_error'] = "L'envoi du message a échoué. Merci de réessayer ultérieurement.";
@@ -127,5 +190,19 @@ class ContactController extends Controller
 
         Response::redirect(route('contact'))->send();
         exit;
+    }
+
+    protected function logContact(string $message): void
+    {
+        if (!(bool) config('mail.log_enabled', false)) {
+            return;
+        }
+
+        $message = str_replace(["\r", "\n"], ' ', $message);
+        $dir = __DIR__ . '/../../../storage/logs';
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+        @file_put_contents($dir . '/contact.log', date('Y-m-d H:i:s') . ' ' . $message . "\n", FILE_APPEND | LOCK_EX);
     }
 }
