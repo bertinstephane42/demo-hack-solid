@@ -45,7 +45,7 @@ class ContactController extends Controller
         $_SESSION['_contact_captcha'] = $captchaA + $captchaB;
 
         return $this->view('contact', [
-            'title' => 'Contact — NetRAlec',
+            'title' => 'Contact — Cours-Réseaux',
             'year' => \date('Y'),
             'error' => $error,
             'success' => $success,
@@ -54,7 +54,6 @@ class ContactController extends Controller
             'form_time' => $formTime,
             'captcha_a' => $captchaA,
             'captcha_b' => $captchaB,
-            'mail_engine' => config('mail.engine', 'mail'),
         ], 'layouts/contact');
     }
 
@@ -80,13 +79,12 @@ class ContactController extends Controller
         $isHuman = $validToken && $timingOk && !$isBot;
 
         $this->logContact(sprintf(
-            'gate token=%s elapsed=%ds honeypot=%s captcha=%s human=%s engine=%s',
+            'gate token=%s elapsed=%ds honeypot=%s captcha=%s human=%s',
             $validToken ? 'ok' : 'fail',
             $elapsed,
             $isBot ? 'filled' : 'empty',
             $validCaptcha ? 'ok' : 'fail',
-            $isHuman ? 'yes' : 'no',
-            config('mail.engine', 'mail')
+            $isHuman ? 'yes' : 'no'
         ));
 
         if (!$isHuman) {
@@ -166,8 +164,8 @@ class ContactController extends Controller
         $sent = $this->mailer->contact($name, $email, $message, $copyRequested ? $copyEmail : null);
         $this->logContact('mail result=' . var_export($sent, true)
             . ' error=' . $this->mailer->lastError
-            . ' to=' . config('mail.to', 'contact@netralec.fr')
-            . ' from=' . config('mail.from', 'contact@netralec.fr')
+            . ' to=' . config('mail.to', 'contact@cours-reseaux.fr')
+            . ' from=' . config('mail.from', 'contact@cours-reseaux.fr')
             . ' copy=' . ($copyRequested ? 'yes' : 'no')
             . ($copyRequested ? ' copy_relation=' . $copyRelation . ' copy_email=' . $copyEmail : ''));
 
