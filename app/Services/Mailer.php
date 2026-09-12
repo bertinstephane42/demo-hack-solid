@@ -39,6 +39,12 @@ class Mailer
 
         $this->lastError = '';
 
+        if (!$this->consumeQuota()) {
+            $this->lastError = 'Le quota maximal d\'envois est atteint. Merci de réessayer plus tard.';
+            $this->writeLog('quota denied to=' . $to);
+            return false;
+        }
+
         $sent = $this->deliver($to, $subject, $body, $headerString, $from);
         if (!$sent) {
             $this->lastError = 'La fonction mail() PHP a échoué.';
@@ -146,6 +152,64 @@ class Mailer
             @mkdir($dir, 0775, true);
         }
         @file_put_contents($dir . '/mailer.log', date('Y-m-d H:i:s') . ' ' . $message . "\n", FILE_APPEND | LOCK_EX);
+    }
+
+    /**
+     * Limite globale d'envois (heure + jour) pour protéger le canal d'envoi
+     * (limites de l'hébergeur, réputation du domaine, boîte mail). Compteurs
+     * en fichier (storage/tmp/quota_mail.json) avec verrou exclusif :
+     * contrairement au rate limiting par IP, cette limite s'applique même si
+     * les POST proviennent de nombreuses adresses IP différentes.
+     */
+    protected function consumeQuota(): bool
+    {
+        $quota = config('mail.quota', ['hour_max' => 20, 'day_max' => 60]);
+        $path = $this->quotaFilePath();
+        $dir = \dirname($path);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
+
+        $fp = @\fopen($path, 'c+');
+        if ($fp === false) {
+            return true;
+        }
+        if (!@\flock($fp, LOCK_EX)) {
+            \fclose($fp);
+            return true;
+        }
+
+        $content = \stream_get_contents($fp);
+        $data = \json_decode(\trim((string) $content), true);
+        if (!\is_array($data)) {
+            $data = ['hour' => [], 'day' => []];
+        }
+
+        $hourKey = \date('Y-m-d H:00');
+        $dayKey = \date('Y-m-d');
+        $hourCount = (int) ($data['hour'][$hourKey] ?? 0);
+        $dayCount = (int) ($data['day'][$dayKey] ?? 0);
+
+        $allowed = $hourCount < (int) ($quota['hour_max'] ?? 20)
+            && $dayCount < (int) ($quota['day_max'] ?? 60);
+
+        if ($allowed) {
+            $data['hour'] = [$hourKey => $hourCount + 1];
+            $data['day'] = [$dayKey => $dayCount + 1];
+        }
+
+        \ftruncate($fp, 0);
+        \rewind($fp);
+        \fwrite($fp, \json_encode($data));
+        \flock($fp, LOCK_UN);
+        \fclose($fp);
+
+        return $allowed;
+    }
+
+    protected function quotaFilePath(): string
+    {
+        return __DIR__ . '/../../storage/tmp/quota_mail.json';
     }
 
     public function setFrom(string $from): self
