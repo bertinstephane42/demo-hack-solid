@@ -26,12 +26,16 @@ require_once __DIR__ . '/../app/Http/Middleware/RateLimitMiddleware.php';
 require_once __DIR__ . '/../app/Http/Kernel.php';
 require_once __DIR__ . '/../app/Services/Validator.php';
 require_once __DIR__ . '/../app/Services/Mailer.php';
+require_once __DIR__ . '/../app/Services/Auth.php';
+require_once __DIR__ . '/../app/Services/BrevoConfig.php';
+require_once __DIR__ . '/../app/Services/BrevoMailer.php';
 require_once __DIR__ . '/../app/Models/SitemapMenu.php';
 require_once __DIR__ . '/../app/Http/Controllers/Controller.php';
 require_once __DIR__ . '/../app/Http/Controllers/HomeController.php';
 require_once __DIR__ . '/../app/Http/Controllers/ContactController.php';
 require_once __DIR__ . '/../app/Http/Controllers/SitemapController.php';
 require_once __DIR__ . '/../app/Http/Controllers/ApiController.php';
+require_once __DIR__ . '/../app/Http/Controllers/AdminController.php';
 
 // Create application
 $app = new Core\Application(__DIR__ . '/../');
