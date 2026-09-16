@@ -24,18 +24,10 @@ class Mailer
 
     public function sendTo(string $to, string $subject, string $body, array $headers = []): bool
     {
-        $from = config('mail.from', $this->from);
-        $fromName = config('mail.from_name', $this->fromName);
-
-        $defaultHeaders = [];
-        $defaultHeaders[] = 'From: ' . $this->sanitizeHeader($fromName) . ' <' . $this->sanitizeHeader($from) . '>';
-        $defaultHeaders[] = 'Return-Path: ' . $this->sanitizeHeader($from);
-        $defaultHeaders[] = 'MIME-Version: 1.0';
-        $defaultHeaders[] = 'Content-Type: text/plain; charset=UTF-8';
-        $defaultHeaders[] = 'Content-Transfer-Encoding: 8bit';
-
-        $allHeaders = array_merge($defaultHeaders, $headers);
-        $headerString = implode("\r\n", $allHeaders);
+        $mailConfig = config('mail', []);
+        $engine = $mailConfig['engine'] ?? 'mail';
+        $from = $mailConfig['from'] ?? $this->from;
+        $fromName = $mailConfig['from_name'] ?? $this->fromName;
 
         $this->lastError = '';
 
@@ -45,12 +37,47 @@ class Mailer
             return false;
         }
 
+        $this->writeLog("attempt engine={$engine} from={$from} to={$to} name={$fromName}");
+
+        if ($engine === 'brevo') {
+            $brevo = $mailConfig['brevo'] ?? [];
+            $username = (string) ($brevo['smtp_user'] ?? '');
+            $password = (string) ($brevo['smtp_password'] ?? '');
+
+            if ($username !== '' || $password !== '') {
+                $transport = new SmtpTransport(
+                    (string) ($brevo['smtp_host'] ?? 'smtp-relay.brevo.com'),
+                    (int) ($brevo['smtp_port'] ?? 587),
+                    $username,
+                    $password,
+                    (string) ($brevo['smtp_security'] ?? 'tls'),
+                );
+
+                $sent = $transport->send($to, $from, $fromName, $subject, $body, $headers);
+                $this->lastError = $transport->lastError;
+                $this->writeLog('brevo result=' . var_export($sent, true) . ' error=' . $transport->lastError);
+                return $sent;
+            }
+
+            $this->writeLog('brevo creds empty — fallback to mail() engine');
+        }
+
+        $defaultHeaders = [];
+        $defaultHeaders[] = "From: {$fromName} <{$from}>";
+        $defaultHeaders[] = "Return-Path: {$from}";
+        $defaultHeaders[] = 'MIME-Version: 1.0';
+        $defaultHeaders[] = 'Content-Type: text/plain; charset=UTF-8';
+        $defaultHeaders[] = 'Content-Transfer-Encoding: 8bit';
+
+        $allHeaders = array_merge($defaultHeaders, $headers);
+        $headerString = implode("\r\n", $allHeaders);
+
         $sent = $this->deliver($to, $subject, $body, $headerString, $from);
         if (!$sent) {
             $this->lastError = 'La fonction mail() PHP a échoué.';
         }
 
-        $this->writeLog('mail() to=' . $to . ' result=' . var_export($sent, true) . ' error=' . $this->lastError);
+        $this->writeLog('mail() result=' . var_export($sent, true) . ' error=' . $this->lastError);
 
         return $sent;
     }
