@@ -363,6 +363,7 @@
 		let particles = [];
 		let running = false;
 		let soundEnabled = false;
+		let fireInterval;
 		
 		const boomSound = new Audio((window.APP_PATH || '') + '/index/sound/fireboom.mp3');
 		boomSound.volume = 0.4; // volume raisonnable
@@ -653,6 +654,7 @@
 	let paused = false;
 	let audioStarted = false;
 	let audioElement = null;
+	let demoRafId = null;
 	
 	// === AUDIO ANALYSIS — initialisation UNIQUE ===
 	if (!window.hackerAudioNodes) {
@@ -743,6 +745,10 @@
 		hackerAudio.pause();              // stoppe la musique
 		hackerAudio.currentTime = 0;      // reset audio
 		audioStarted = false;
+		if (demoRafId) {                  // stoppe la boucle d'animation
+			cancelAnimationFrame(demoRafId);
+			demoRafId = null;
+		}
 	});
 
 	// ========================================================
@@ -1223,9 +1229,10 @@
 			musicDiv.style.transform = `translateX(${-musicPos + centerOffset - textWidth / 2 - leftShift}px)`;
 		}
 
-		// Boucle principale de la démo ASCII
-		function loop() {
-			frame++;
+// Boucle principale de la démo ASCII
+	function loop() {
+		if (demoRafId !== null) cancelAnimationFrame(demoRafId);
+		frame++;
 			
 			const level = audioStarted ? getAudioLevel() : 128; // récupère le niveau audio
 
@@ -1272,7 +1279,7 @@
 		}
 
 		// Démarrage de la boucle
-		loop();
+		demoRafId = requestAnimationFrame(loop);
 	}
 	})();
 
