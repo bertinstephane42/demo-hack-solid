@@ -104,6 +104,14 @@ class AdminController extends Controller
                     ? 'text-bg-success'
                     : 'text-bg-warning',
             ],
+            'password' => [
+                'title' => 'Mot de passe',
+                'description' => 'Modifier le mot de passe administrateur (politique stricte : 20 caractères, minuscule, majuscule, chiffre et symbole).',
+                'route' => route('admin.password'),
+                'icon' => '&#128274;',
+                'status' => 'Hash bcrypt + protection CSRF',
+                'status_class' => 'text-bg-success',
+            ],
         ];
 
         $flash = $_SESSION['_admin_flash'] ?? null;
@@ -116,6 +124,72 @@ class AdminController extends Controller
             'modules' => $modules,
             'flash' => $flash,
         ], 'layouts/admin');
+    }
+
+    public function password(): string
+    {
+        $this->auth->requireAuth();
+
+        $error = $_SESSION['_admin_password_error'] ?? null;
+        $success = $_SESSION['_admin_password_success'] ?? null;
+        unset($_SESSION['_admin_password_error'], $_SESSION['_admin_password_success']);
+
+        return $this->view('admin/password', [
+            'title' => 'Changer le mot de passe — Cours-Réseaux',
+            'year' => \date('Y'),
+            'error' => $error,
+            'success' => $success,
+        ], 'layouts/admin');
+    }
+
+    public function doPassword(Request $request): void
+    {
+        $this->auth->requireAuth();
+
+        if (!$this->validCsrf($request)) {
+            $_SESSION['_admin_password_error'] = 'Session expirée. Merci de recharger la page et de réessayer.';
+            Response::redirect(route('admin.password'))->send();
+            exit;
+        }
+
+        $current = (string) $request->body('current_password', '');
+        $new = (string) $request->body('new_password', '');
+        $confirm = (string) $request->body('confirm_password', '');
+
+        $currentHash = config('admin.password_hash', '');
+        if (!password_verify($current, $currentHash)) {
+            $_SESSION['_admin_password_error'] = 'Le mot de passe actuel est incorrect.';
+            Response::redirect(route('admin.password'))->send();
+            exit;
+        }
+
+        if ($new !== $confirm) {
+            $_SESSION['_admin_password_error'] = 'Les nouveaux mots de passe ne correspondent pas.';
+            Response::redirect(route('admin.password'))->send();
+            exit;
+        }
+
+        if ($new === $current) {
+            $_SESSION['_admin_password_error'] = 'Le nouveau mot de passe doit être différent du mot de passe actuel.';
+            Response::redirect(route('admin.password'))->send();
+            exit;
+        }
+
+        $policyError = $this->auth->passwordPolicyError($new);
+        if ($policyError !== '') {
+            $_SESSION['_admin_password_error'] = $policyError;
+            Response::redirect(route('admin.password'))->send();
+            exit;
+        }
+
+        if ($this->auth->changePassword($new)) {
+            $_SESSION['_admin_password_success'] = 'Mot de passe modifié avec succès.';
+        } else {
+            $_SESSION['_admin_password_error'] = 'Erreur lors de la modification du mot de passe.';
+        }
+
+        Response::redirect(route('admin.password'))->send();
+        exit;
     }
 
     public function mail(): string
