@@ -92,6 +92,26 @@ function asset(string $path): string
     return $basePath . '/' . ltrim($path, '/');
 }
 
+/**
+ * Token CSRF (généré une fois par session, puis conservé).
+ * Utilisé par toutes les actions POST de l'administration.
+ */
+function csrf_token(): string
+{
+    if (empty($_SESSION['_csrf_token'])) {
+        $_SESSION['_csrf_token'] = \bin2hex(\random_bytes(32));
+    }
+    return $_SESSION['_csrf_token'];
+}
+
+/**
+ * Champ caché à insérer dans chaque formulaire POST de l'administration.
+ */
+function csrf_field(): string
+{
+    return '<input type="hidden" name="_csrf" value="' . \htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8') . '">';
+}
+
 function route(string $name, array $params = []): string
 {
     $basePath = $_SERVER['APP_BASE_PATH'] ?? '';
@@ -100,11 +120,11 @@ function route(string $name, array $params = []): string
         'contact' => '/contact',
         'sitemap' => '/sitemap',
         'api.data' => '/api/data',
-        'admin.login' => '/admin/login',
+        'admin.login' => '/admin',
         'admin.logout' => '/admin/logout',
-        'admin.dashboard' => '/admin',
-        'admin.send' => '/admin/send',
-        'admin.settings' => '/admin/settings',
+        'admin.dashboard' => '/admin/dashboard',
+        'admin.mail' => '/admin/mail',
+        'admin.mail.test' => '/admin/mail/test',
     ];
     $path = $routes[$name] ?? '/';
     return $basePath . $path;
