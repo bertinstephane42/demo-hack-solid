@@ -5,9 +5,8 @@ namespace App\Providers;
 use Core\Application;
 use App\Services\Validator;
 use App\Services\Mailer;
+use App\Services\MailConfig;
 use App\Services\Auth;
-use App\Services\BrevoConfig;
-use App\Services\BrevoMailer;
 use App\Http\Kernel;
 
 class AppServiceProvider extends ServiceProvider
@@ -30,16 +29,12 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app->singleton(MailConfig::class, function () {
+            return new MailConfig();
+        });
+
         $this->app->singleton(Auth::class, function () {
             return new Auth();
-        });
-
-        $this->app->singleton(BrevoConfig::class, function () {
-            return new BrevoConfig();
-        });
-
-        $this->app->singleton(BrevoMailer::class, function () {
-            return new BrevoMailer();
         });
 
         $this->app->singleton(\Core\Router::class, function () {
@@ -54,6 +49,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (\session_status() === \PHP_SESSION_NONE) {
+            \session_set_cookie_params([
+                'lifetime' => 0,
+                'path' => '/',
+                'domain' => '',
+                'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
             \session_start();
         }
     }
