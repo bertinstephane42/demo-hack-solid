@@ -4,9 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= $title ?? 'Contact — Cours-Réseaux' ?></title>
+    <meta name="description" content="Contactez l'équipe Cours-Réseaux pour toute question relative aux formations BTS SIO, CPI et Expert Cyber.">
     <link rel="canonical" href="https://cours-reseaux.fr/contact">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="icon" type="image/svg+xml" href="<?= asset('img/favicon.svg') ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/spacelab/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('css/index.css') ?>">
@@ -62,16 +64,6 @@
         })();
     </script>
     <script>
-        document.addEventListener("contextmenu", event => event.preventDefault());
-        document.addEventListener("keydown", function (e) {
-            if (
-                e.key === "F12" ||
-                (e.ctrlKey && e.shiftKey && e.key === "I") ||
-                (e.ctrlKey && e.key === "U")
-            ) {
-                e.preventDefault();
-            }
-        });
         document.addEventListener("DOMContentLoaded", () => {
             const alertBox = document.querySelector(".alert-success, .alert-danger");
             if (alertBox) {

@@ -4,9 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= $title ?? 'Plan du site cours-reseaux.fr' ?></title>
+    <meta name="description" content="Plan du site cours-reseaux.fr — trouvez facilement les cours BTS SIO, formations CPI et parcours Expert Cyber.">
     <link rel="canonical" href="https://cours-reseaux.fr/">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="icon" type="image/svg+xml" href="<?= asset('img/favicon.svg') ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/spacelab/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('css/index.css') ?>">
