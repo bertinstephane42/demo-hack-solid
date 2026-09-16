@@ -34,6 +34,7 @@
                 <?php if (app(\App\Services\Auth::class)->check()): ?>
                     <a href="<?= route('admin.dashboard') ?>" class="btn btn-outline-warning btn-sm">Dashboard</a>
                     <a href="<?= route('admin.mail') ?>" class="btn btn-outline-light btn-sm">Mails</a>
+                    <a href="<?= route('admin.password') ?>" class="btn btn-outline-light btn-sm">Mot de passe</a>
                     <form action="<?= route('admin.logout') ?>" method="POST" class="d-inline">
                         <?= csrf_field() ?>
                         <button type="submit" class="btn btn-outline-danger btn-sm">Déconnexion</button>
