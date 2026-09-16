@@ -22,6 +22,15 @@ class Auth
      */
     protected const THROTTLE_BACKOFF = [1 => 3, 2 => 10, 3 => 30, 4 => 120, 5 => 600, 6 => 1800];
 
+    /**
+     * Politique de mot de passe de l'administration : longueur minimale,
+     * classes de caractères exigées (minuscule, majuscule, chiffre) et jeu
+     * de caractères spéciaux courants requis.
+     */
+    public const PASSWORD_MIN_LENGTH = 20;
+
+    public const PASSWORD_SPECIALS = '!@#$%^&*()_+-=[]{};:,.?';
+
     public function attempt(string $email, string $password): bool
     {
         $adminEmail = config('admin.admin_email', 'admin@cours-reseaux.fr');
@@ -207,6 +216,64 @@ class Auth
         }
 
         @file_put_contents($dir . '/login.log', $line . "\n", FILE_APPEND | LOCK_EX);
+    }
+
+    public function changePassword(string $newPassword): bool
+    {
+        if ($this->passwordPolicyError($newPassword) !== '') {
+            return false;
+        }
+
+        $hash = password_hash($newPassword, PASSWORD_BCRYPT);
+        $configPath = __DIR__ . '/../../config/admin.php';
+
+        $config = require $configPath;
+        $config['password_hash'] = $hash;
+
+        $content = "<?php\nreturn " . var_export($config, true) . ";\n";
+        $result = @file_put_contents($configPath, $content);
+
+        if ($result !== false) {
+            clearstatcache();
+            if (function_exists('opcache_invalidate')) {
+                @opcache_invalidate($configPath, true);
+            }
+        }
+
+        return $result !== false;
+    }
+
+    /**
+     * Vérifie qu'un mot de passe respecte la politique :
+     * au moins PASSWORD_MIN_LENGTH caractères, avec au moins une minuscule,
+     * une majuscule, un chiffre et un caractère spécial du jeu courant.
+     * Retourne un message d'erreur explicite, ou une chaîne vide si valide.
+     */
+    public function passwordPolicyError(string $password): string
+    {
+        if (\strlen($password) < self::PASSWORD_MIN_LENGTH) {
+            return 'Le nouveau mot de passe doit contenir au moins '
+                . self::PASSWORD_MIN_LENGTH . ' caractères.';
+        }
+
+        if (\preg_match('/\p{Ll}/u', $password) !== 1) {
+            return 'Le nouveau mot de passe doit contenir au moins une lettre minuscule.';
+        }
+
+        if (\preg_match('/\p{Lu}/u', $password) !== 1) {
+            return 'Le nouveau mot de passe doit contenir au moins une lettre majuscule.';
+        }
+
+        if (\preg_match('/[0-9]/', $password) !== 1) {
+            return 'Le nouveau mot de passe doit contenir au moins un chiffre.';
+        }
+
+        if (\preg_match('/[' . \preg_quote(self::PASSWORD_SPECIALS, '/') . ']/', $password) !== 1) {
+            return 'Le nouveau mot de passe doit contenir au moins un caractère spécial ('
+                . self::PASSWORD_SPECIALS . ').';
+        }
+
+        return '';
     }
 
     public function requireAuth(): void
