@@ -100,6 +100,11 @@ function route(string $name, array $params = []): string
         'contact' => '/contact',
         'sitemap' => '/sitemap',
         'api.data' => '/api/data',
+        'admin.login' => '/admin/login',
+        'admin.logout' => '/admin/logout',
+        'admin.dashboard' => '/admin',
+        'admin.send' => '/admin/send',
+        'admin.settings' => '/admin/settings',
     ];
     $path = $routes[$name] ?? '/';
     return $basePath . $path;
