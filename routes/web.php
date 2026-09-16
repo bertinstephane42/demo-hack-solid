@@ -33,3 +33,7 @@ $router->get('/admin/dashboard', AdminController::class . '@dashboard')->name('a
 $router->get('/admin/mail', AdminController::class . '@mail')->name('admin.mail');
 $router->post('/admin/mail', AdminController::class . '@doMail');
 $router->post('/admin/mail/test', AdminController::class . '@testMail')->name('admin.mail.test');
+
+// Administration — module "Changement de mot de passe"
+$router->get('/admin/password', AdminController::class . '@password')->name('admin.password');
+$router->post('/admin/password', AdminController::class . '@doPassword');
