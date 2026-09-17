@@ -35,6 +35,10 @@
                     <a href="<?= route('admin.dashboard') ?>" class="btn btn-outline-warning btn-sm">Dashboard</a>
                     <a href="<?= route('admin.mail') ?>" class="btn btn-outline-light btn-sm">Mails</a>
                     <a href="<?= route('admin.password') ?>" class="btn btn-outline-light btn-sm">Mot de passe</a>
+                    <a href="<?= route('admin.user') ?>" class="btn btn-outline-light btn-sm">Compte</a>
+                    <a href="<?= route('admin.logs') ?>" class="btn btn-outline-light btn-sm">Journal</a>
+                    <a href="<?= route('admin.export') ?>" class="btn btn-outline-light btn-sm">Sauvegarde</a>
+                    <a href="<?= route('admin.system') ?>" class="btn btn-outline-light btn-sm">Système</a>
                     <form action="<?= route('admin.logout') ?>" method="POST" class="d-inline">
                         <?= csrf_field() ?>
                         <button type="submit" class="btn btn-outline-danger btn-sm">Déconnexion</button>
