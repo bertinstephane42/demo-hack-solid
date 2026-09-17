@@ -1,5 +1,7 @@
 <?php
 
+ob_start();
+
 // Core framework
 require_once __DIR__ . '/../core/Container.php';
 require_once __DIR__ . '/../core/Request.php';
