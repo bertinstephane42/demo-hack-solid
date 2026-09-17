@@ -581,19 +581,22 @@ class AdminController extends Controller
 
         $check = app(SystemCheck::class);
         $result = $check->purgeTmp();
+        $remaining = $check->tmpFiles();
 
         if ($result['count'] > 0) {
-            $remaining = $check->tmpFiles()['count'];
-            $plural = $result['count'] > 1 ? 's' : '';
-
-            $_SESSION['_admin_success'] = $result['count'] . ' fichier' . $plural
-                . ' temporaire' . $plural . ' supprimé' . $plural
-                . ' (' . $check->humanBytes($result['bytes']) . ' libérés)'
-                . ($remaining > 0
-                    ? '. ' . $remaining . ' fichier' . ($remaining > 1 ? 's' : '') . ' protégé' . ($remaining > 1 ? 's' : '') . ' conservé' . ($remaining > 1 ? 's' : '') . '.'
-                    : '.');
+            $message = $result['count'] . ' fichier' . ($result['count'] > 1 ? 's' : '')
+                . ' temporaire' . ($result['count'] > 1 ? 's' : '')
+                . ' supprimé' . ($result['count'] > 1 ? 's' : '')
+                . ' (' . $check->humanBytes($result['bytes']) . ' libérés). Les compteurs de limitation et le quota d\'envoi repartent de zéro.';
+            if ($remaining['count'] > 0) {
+                $message .= ' ' . $remaining['count'] . ' fichier' . ($remaining['count'] > 1 ? 's' : '')
+                    . ' non supprimé' . ($remaining['count'] > 1 ? 's' : '') . ' (droits insuffisants).';
+            }
+            $_SESSION['_admin_success'] = $message;
+        } elseif ($remaining['count'] > 0) {
+            $_SESSION['_admin_error'] = 'Impossible de supprimer les fichiers temporaires (droits d\'écriture sur storage/tmp manquants).';
         } else {
-            $_SESSION['_admin_success'] = 'Aucun fichier temporaire à purger.';
+            $_SESSION['_admin_success'] = 'Aucun fichier temporaire à supprimer.';
         }
 
         Response::redirect(route('admin.system'))->send();
@@ -702,8 +705,9 @@ class AdminController extends Controller
             $message = $transport->lastError;
         } else {
             $mailer = new Mailer($form['from'], $form['to'], $form['from_name']);
+            $safeFromName = $mailer->sanitizeHeader($form['from_name']);
             $headerString = implode("\r\n", [
-                "From: {$form['from_name']} <{$form['from']}>",
+                "From: {$safeFromName} <{$form['from']}>",
                 'Return-Path: ' . $form['from'],
                 'MIME-Version: 1.0',
                 'Content-Type: text/plain; charset=UTF-8',
