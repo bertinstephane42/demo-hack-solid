@@ -37,3 +37,7 @@ $router->post('/admin/mail/test', AdminController::class . '@testMail')->name('a
 // Administration — module "Changement de mot de passe"
 $router->get('/admin/password', AdminController::class . '@password')->name('admin.password');
 $router->post('/admin/password', AdminController::class . '@doPassword');
+
+// Administration — module "Compte utilisateur" (adresse e-mail de connexion)
+$router->get('/admin/user', AdminController::class . '@user')->name('admin.user');
+$router->post('/admin/user', AdminController::class . '@doUser');
