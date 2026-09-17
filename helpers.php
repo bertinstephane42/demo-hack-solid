@@ -122,11 +122,19 @@ function route(string $name, array $params = []): string
         'api.data' => '/api/data',
         'admin.login' => '/admin',
         'admin.logout' => '/admin/logout',
+        'admin.forgot' => '/admin/forgot',
+        'admin.reset' => '/admin/reset',
         'admin.dashboard' => '/admin/dashboard',
         'admin.mail' => '/admin/mail',
         'admin.mail.test' => '/admin/mail/test',
         'admin.password' => '/admin/password',
         'admin.user' => '/admin/user',
+        'admin.logs' => '/admin/logs',
+        'admin.logs.clear' => '/admin/logs/clear',
+        'admin.export' => '/admin/export',
+        'admin.export.download' => '/admin/export/download',
+        'admin.system' => '/admin/system',
+        'admin.system.purge-tmp' => '/admin/system/purge-tmp',
     ];
     $path = $routes[$name] ?? '/';
     return $basePath . $path;
