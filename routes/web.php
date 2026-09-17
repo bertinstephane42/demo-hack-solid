@@ -23,6 +23,12 @@ $router->post('/admin', AdminController::class . '@login')->name('admin.login.po
 // Alias rétro-compatible du formulaire de connexion
 $router->get('/admin/login', AdminController::class . '@showLogin');
 
+// Administration — réinitialisation du mot de passe par code e-mail
+$router->get('/admin/forgot', AdminController::class . '@forgot')->name('admin.forgot');
+$router->post('/admin/forgot', AdminController::class . '@doForgot');
+$router->get('/admin/reset', AdminController::class . '@reset')->name('admin.reset');
+$router->post('/admin/reset', AdminController::class . '@doReset');
+
 // Administration — déconnexion (POST protégée par CSRF)
 $router->post('/admin/logout', AdminController::class . '@logout')->name('admin.logout');
 
@@ -41,3 +47,15 @@ $router->post('/admin/password', AdminController::class . '@doPassword');
 // Administration — module "Compte utilisateur" (adresse e-mail de connexion)
 $router->get('/admin/user', AdminController::class . '@user')->name('admin.user');
 $router->post('/admin/user', AdminController::class . '@doUser');
+
+// Administration — module "Journal de connexion"
+$router->get('/admin/logs', AdminController::class . '@logs')->name('admin.logs');
+$router->post('/admin/logs/clear', AdminController::class . '@clearLogs')->name('admin.logs.clear');
+
+// Administration — module "Sauvegarde" (export JSON de la configuration)
+$router->get('/admin/export', AdminController::class . '@export')->name('admin.export');
+$router->post('/admin/export/download', AdminController::class . '@downloadExport')->name('admin.export.download');
+
+// Administration — module "Système" (diagnostic + purge storage/tmp)
+$router->get('/admin/system', AdminController::class . '@system')->name('admin.system');
+$router->post('/admin/system/purge-tmp', AdminController::class . '@purgeTmp')->name('admin.system.purge-tmp');
