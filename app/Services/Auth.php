@@ -317,4 +317,107 @@ class Auth
             exit;
         }
     }
+
+    /**
+     * Adresse IP du client, en tenant compte des proxys éventuels.
+     */
+    public function clientIp(): string
+    {
+        return self::resolveClientIp();
+    }
+
+    public function loginLogPath(): string
+    {
+        return __DIR__ . '/../../storage/logs/login.log';
+    }
+
+    /**
+     * Retourne les dernières entrées du journal de connexion, de la plus
+     * récente à la plus ancienne. Lecture plafonnée pour rester performante
+     * même si le fichier de log devient volumineux.
+     */
+    public function readLoginLog(int $limit = 200): array
+    {
+        $limit = max(1, min(500, $limit));
+        $file = $this->loginLogPath();
+
+        if (!is_file($file)) {
+            return [];
+        }
+
+        $maxBytes = 2 * 1024 * 1024;
+        $size = (int) @filesize($file);
+
+        if ($size > $maxBytes) {
+            $fp = @fopen($file, 'rb');
+            if ($fp === false) {
+                return [];
+            }
+            @fseek($fp, -$maxBytes, SEEK_END);
+            $content = (string) @stream_get_contents($fp);
+            @fclose($fp);
+            $newline = strpos($content, "\n");
+            if ($newline !== false) {
+                $content = substr($content, $newline + 1);
+            }
+        } else {
+            $content = (string) @file_get_contents($file);
+        }
+
+        $content = trim($content);
+        if ($content === '') {
+            return [];
+        }
+
+        $lines = preg_split('/\R/', $content);
+        if (!is_array($lines)) {
+            return [];
+        }
+
+        $lines = array_slice($lines, -$limit);
+
+        $entries = [];
+        foreach (array_reverse($lines) as $line) {
+            if (trim($line) === '') {
+                continue;
+            }
+            $entries[] = $this->parseLogLine($line);
+        }
+
+        return $entries;
+    }
+
+    protected function parseLogLine(string $line): array
+    {
+        $pattern = '/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) login ip=(\S*) email=(\S*) result=(\S+)(?:\s+(.*))?$/';
+
+        if (preg_match($pattern, $line, $m) === 1) {
+            return [
+                'time' => $m[1],
+                'ip' => $m[2],
+                'email' => $m[3],
+                'result' => $m[4],
+                'extra' => $m[5] ?? '',
+            ];
+        }
+
+        return [
+            'time' => '',
+            'ip' => '',
+            'email' => '',
+            'result' => 'inconnu',
+            'extra' => $line,
+        ];
+    }
+
+    public function clearLoginLog(): bool
+    {
+        $file = $this->loginLogPath();
+
+        if (!is_file($file)) {
+            return true;
+        }
+
+        return @file_put_contents($file, '') !== false;
+    }
 }
