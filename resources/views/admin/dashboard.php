@@ -32,17 +32,24 @@
         <h5 class="fw-bold text-uppercase text-muted small mb-3">Maintenance</h5>
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
-                <div class="d-flex flex-wrap align-items-center gap-2">
-                    <a href="<?= route('admin.system') ?>" class="btn btn-outline-primary btn-sm">Système</a>
-                    <a href="<?= route('admin.logs') ?>" class="btn btn-outline-primary btn-sm">Journal de connexion</a>
-                    <a href="<?= route('admin.export') ?>" class="btn btn-outline-primary btn-sm">Sauvegarde</a>
-                    <form action="<?= route('admin.system.purge-tmp') ?>" method="POST" class="d-inline"
-                          onsubmit="return confirm('Purger tous les fichiers temporaires de storage/tmp ?');">
-                        <?= csrf_field() ?>
-                        <button type="submit" class="btn btn-outline-danger btn-sm">
-                            Purger storage/tmp<?= (int) $tmp_count > 0 ? ' (' . (int) $tmp_count . ')' : '' ?>
-                        </button>
-                    </form>
+                <p class="card-text text-muted small">Journal de connexion, sauvegarde des données et état du système</p>
+                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#maintenanceTools" aria-expanded="false" aria-controls="maintenanceTools">
+                    Outils de maintenance
+                </button>
+                <div class="collapse mt-3" id="maintenanceTools">
+                    <div class="d-grid gap-2">
+                        <a href="<?= route('admin.system') ?>" class="btn btn-outline-primary btn-sm">Système</a>
+                        <a href="<?= route('admin.logs') ?>" class="btn btn-outline-primary btn-sm">Journal de connexion</a>
+                        <a href="<?= route('admin.export') ?>" class="btn btn-outline-primary btn-sm">Sauvegarde</a>
+                        <form action="<?= route('admin.system.purge-tmp') ?>" method="POST"
+                              onsubmit="return confirm('Purger tous les fichiers temporaires de storage/tmp ?');">
+                            <?= csrf_field() ?>
+                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                Purger storage/tmp<?= (int) $tmp_count > 0 ? ' (' . (int) $tmp_count . ')' : '' ?>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
