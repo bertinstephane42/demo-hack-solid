@@ -112,6 +112,14 @@ class AdminController extends Controller
                 'status' => 'Hash bcrypt + protection CSRF',
                 'status_class' => 'text-bg-success',
             ],
+            'user' => [
+                'title' => 'Utilisateur',
+                'description' => 'Modifier l\'e-mail de connexion admin.',
+                'route' => route('admin.user'),
+                'icon' => '&#128100;',
+                'status' => 'Email de connexion admin',
+                'status_class' => 'text-bg-success',
+            ],
         ];
 
         $flash = $_SESSION['_admin_flash'] ?? null;
@@ -189,6 +197,72 @@ class AdminController extends Controller
         }
 
         Response::redirect(route('admin.password'))->send();
+        exit;
+    }
+
+    public function user(): string
+    {
+        $this->auth->requireAuth();
+
+        $error = $_SESSION['_admin_user_error'] ?? null;
+        $success = $_SESSION['_admin_user_success'] ?? null;
+        unset($_SESSION['_admin_user_error'], $_SESSION['_admin_user_success']);
+
+        return $this->view('admin/user', [
+            'title' => 'Compte utilisateur — Cours-Réseaux',
+            'year' => \date('Y'),
+            'admin_email' => $this->auth->user(),
+            'error' => $error,
+            'success' => $success,
+        ], 'layouts/admin');
+    }
+
+    public function doUser(Request $request): void
+    {
+        $this->auth->requireAuth();
+
+        if (!$this->validCsrf($request)) {
+            $_SESSION['_admin_user_error'] = 'Session expirée. Merci de recharger la page et de réessayer.';
+            Response::redirect(route('admin.user'))->send();
+            exit;
+        }
+
+        $current = (string) $request->body('current_password', '');
+        $newEmail = strtolower(trim((string) $request->body('new_email', '')));
+        $confirm = strtolower(trim((string) $request->body('confirm_email', '')));
+
+        $currentHash = config('admin.password_hash', '');
+        if (!password_verify($current, $currentHash)) {
+            $_SESSION['_admin_user_error'] = 'Le mot de passe actuel est incorrect.';
+            Response::redirect(route('admin.user'))->send();
+            exit;
+        }
+
+        if (filter_var($newEmail, FILTER_VALIDATE_EMAIL) === false) {
+            $_SESSION['_admin_user_error'] = 'L\'adresse e-mail saisie n\'est pas valide.';
+            Response::redirect(route('admin.user'))->send();
+            exit;
+        }
+
+        if ($newEmail !== $confirm) {
+            $_SESSION['_admin_user_error'] = 'Les nouvelles adresses e-mail ne correspondent pas.';
+            Response::redirect(route('admin.user'))->send();
+            exit;
+        }
+
+        if ($newEmail === strtolower(trim((string) config('admin.admin_email', '')))) {
+            $_SESSION['_admin_user_error'] = 'La nouvelle adresse doit être différente de l\'adresse actuelle.';
+            Response::redirect(route('admin.user'))->send();
+            exit;
+        }
+
+        if ($this->auth->changeEmail($newEmail)) {
+            $_SESSION['_admin_user_success'] = 'Adresse e-mail de connexion modifiée avec succès.';
+        } else {
+            $_SESSION['_admin_user_error'] = 'Erreur lors de la modification de l\'adresse e-mail.';
+        }
+
+        Response::redirect(route('admin.user'))->send();
         exit;
     }
 
