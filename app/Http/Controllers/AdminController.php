@@ -123,6 +123,15 @@ class AdminController extends Controller
                 'status' => 'Email de connexion admin',
                 'status_class' => 'text-bg-success',
             ],
+            'maintenance' => [
+                'title' => 'Maintenance',
+                'description' => 'Journal de connexion, sauvegarde des données et état du système.',
+                'route' => route('admin.system'),
+                'icon' => '&#128736;',
+                'status' => 'Outils de maintenance',
+                'status_class' => 'text-bg-secondary',
+                'vertical_tools' => true,
+            ],
         ];
 
         $flash = $_SESSION['_admin_flash'] ?? null;
