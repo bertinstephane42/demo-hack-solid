@@ -16,42 +16,39 @@
                         <div class="card-body text-center p-4">
                             <div class="display-6 mb-2"><?= $module['icon'] ?></div>
                             <h5 class="card-title fw-bold" style="color:#003878;"><?= htmlspecialchars($module['title']) ?></h5>
-                            <p class="card-text text-muted small"><?= htmlspecialchars($module['description']) ?></p>
-                            <p class="card-text">
-                                <span class="badge <?= htmlspecialchars($module['status_class']) ?>">
-                                    <?= htmlspecialchars($module['status']) ?>
-                                </span>
-                            </p>
-                            <a href="<?= $module['route'] ?>" class="btn btn-outline-primary btn-sm">Configurer</a>
+                            <?php if (($module['vertical_tools'] ?? false) === true): ?>
+                                <p class="card-text text-muted small">Journal de connexion, sauvegarde des données et état du système</p>
+                                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#maintenanceTools" aria-expanded="false" aria-controls="maintenanceTools">
+                                    Outils de maintenance
+                                </button>
+                                <div class="collapse mt-3 text-start" id="maintenanceTools">
+                                    <div class="d-grid gap-2">
+                                        <a href="<?= route('admin.system') ?>" class="btn btn-outline-primary btn-sm">Système</a>
+                                        <a href="<?= route('admin.logs') ?>" class="btn btn-outline-primary btn-sm">Journal de connexion</a>
+                                        <a href="<?= route('admin.export') ?>" class="btn btn-outline-primary btn-sm">Sauvegarde</a>
+                                        <form action="<?= route('admin.system.purge-tmp') ?>" method="POST"
+                                              onsubmit="return confirm('Purger tous les fichiers temporaires de storage/tmp ?');">
+                                            <?= csrf_field() ?>
+                                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                                Purger storage/tmp<?= (int) $tmp_count > 0 ? ' (' . (int) $tmp_count . ')' : '' ?>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <p class="card-text text-muted small"><?= htmlspecialchars($module['description']) ?></p>
+                                <p class="card-text">
+                                    <span class="badge <?= htmlspecialchars($module['status_class']) ?>">
+                                        <?= htmlspecialchars($module['status']) ?>
+                                    </span>
+                                </p>
+                                <a href="<?= $module['route'] ?>" class="btn btn-outline-primary btn-sm">Configurer</a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             <?php endforeach; ?>
-        </div>
-
-        <h5 class="fw-bold text-uppercase text-muted small mb-3">Maintenance</h5>
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body p-4">
-                <p class="card-text text-muted small">Journal de connexion, sauvegarde des données et état du système</p>
-                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#maintenanceTools" aria-expanded="false" aria-controls="maintenanceTools">
-                    Outils de maintenance
-                </button>
-                <div class="collapse mt-3" id="maintenanceTools">
-                    <div class="d-grid gap-2">
-                        <a href="<?= route('admin.system') ?>" class="btn btn-outline-primary btn-sm">Système</a>
-                        <a href="<?= route('admin.logs') ?>" class="btn btn-outline-primary btn-sm">Journal de connexion</a>
-                        <a href="<?= route('admin.export') ?>" class="btn btn-outline-primary btn-sm">Sauvegarde</a>
-                        <form action="<?= route('admin.system.purge-tmp') ?>" method="POST"
-                              onsubmit="return confirm('Purger tous les fichiers temporaires de storage/tmp ?');">
-                            <?= csrf_field() ?>
-                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
-                                Purger storage/tmp<?= (int) $tmp_count > 0 ? ' (' . (int) $tmp_count . ')' : '' ?>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="card border-0 shadow-sm">
