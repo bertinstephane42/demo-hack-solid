@@ -244,6 +244,40 @@ class Auth
     }
 
     /**
+     * Modifie l'adresse e-mail de connexion administrateur.
+     * Persiste dans config/admin.php, purge le cache OPcache et,
+     * si la session est active, met à jour $_SESSION['admin_email'].
+     */
+    public function changeEmail(string $newEmail): bool
+    {
+        $newEmail = strtolower(trim($newEmail));
+
+        if (filter_var($newEmail, FILTER_VALIDATE_EMAIL) === false) {
+            return false;
+        }
+
+        $configPath = __DIR__ . '/../../config/admin.php';
+
+        $config = require $configPath;
+        $config['admin_email'] = $newEmail;
+
+        $content = "<?php\nreturn " . var_export($config, true) . ";\n";
+        $result = @file_put_contents($configPath, $content);
+
+        if ($result !== false) {
+            clearstatcache();
+            if (function_exists('opcache_invalidate')) {
+                @opcache_invalidate($configPath, true);
+            }
+            if ($this->check()) {
+                $_SESSION['admin_email'] = $newEmail;
+            }
+        }
+
+        return $result !== false;
+    }
+
+    /**
      * Vérifie qu'un mot de passe respecte la politique :
      * au moins PASSWORD_MIN_LENGTH caractères, avec au moins une minuscule,
      * une majuscule, un chiffre et un caractère spécial du jeu courant.
