@@ -126,6 +126,7 @@ function route(string $name, array $params = []): string
         'admin.mail' => '/admin/mail',
         'admin.mail.test' => '/admin/mail/test',
         'admin.password' => '/admin/password',
+        'admin.user' => '/admin/user',
     ];
     $path = $routes[$name] ?? '/';
     return $basePath . $path;
