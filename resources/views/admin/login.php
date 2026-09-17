@@ -33,6 +33,9 @@
                         Se connecter
                     </button>
                 </form>
+                <p class="text-center mt-3 mb-0">
+                    <a href="<?= route('admin.forgot') ?>" class="small" style="color:#003878;">Mot de passe oublié ?</a>
+                </p>
             </div>
         </div>
     </div>
