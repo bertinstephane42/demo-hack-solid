@@ -23,6 +23,13 @@ class Auth
     protected const THROTTLE_BACKOFF = [1 => 3, 2 => 10, 3 => 30, 4 => 120, 5 => 600, 6 => 1800];
 
     /**
+     * Durée d'inactivité maximale d'une session d'administration (secondes).
+     * Passé ce délai sans requête authentifiée, la session est détruite et
+     * l'administrateur doit se reconnecter (30 minutes).
+     */
+    public const SESSION_IDLE_TIMEOUT = 1800;
+
+    /**
      * Politique de mot de passe de l'administration : longueur minimale,
      * classes de caractères exigées (minuscule, majuscule, chiffre) et jeu
      * de caractères spéciaux courants requis.
@@ -52,6 +59,8 @@ class Auth
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_email'] = $adminEmail;
         $_SESSION['admin_login_time'] = time();
+        $_SESSION['admin_auth_time'] = time();
+        $_SESSION['admin_last_activity'] = time();
 
         return true;
     }
@@ -178,6 +187,8 @@ class Auth
             $_SESSION['admin_logged_in'],
             $_SESSION['admin_email'],
             $_SESSION['admin_login_time'],
+            $_SESSION['admin_auth_time'],
+            $_SESSION['admin_last_activity'],
             $_SESSION['_admin_login_fail_time'],
             $_SESSION['_csrf_token']
         );
@@ -187,9 +198,50 @@ class Auth
         }
     }
 
+    /**
+     * Indique si la session courante est authentifiée ET encore valide.
+     * Détruit la session et renseigne le message d'erreur adéquat si :
+     *  - le mot de passe a été modifié depuis l'authentification ;
+     *  - la session est restée inactive plus de SESSION_IDLE_TIMEOUT secondes.
+     */
     public function check(): bool
     {
-        return !empty($_SESSION['admin_logged_in']) && !empty($_SESSION['admin_email']);
+        if (empty($_SESSION['admin_logged_in']) || empty($_SESSION['admin_email'])) {
+            return false;
+        }
+
+        $changedAt = (int) config('admin.password_changed_at', 0);
+        $authTime = (int) ($_SESSION['admin_auth_time'] ?? 0);
+
+        if ($changedAt > 0 && $authTime < $changedAt) {
+            $this->logout();
+            $_SESSION['_admin_error'] = 'Votre mot de passe a été modifié. Merci de vous reconnecter.';
+
+            return false;
+        }
+
+        $last = (int) ($_SESSION['admin_last_activity'] ?? $_SESSION['admin_login_time'] ?? 0);
+
+        if ($last > 0 && (time() - $last) > self::SESSION_IDLE_TIMEOUT) {
+            $this->logAttempt((string) ($_SESSION['admin_email'] ?? ''), 'timeout', 'idle=' . (time() - $last) . 's');
+            $this->logout();
+            $_SESSION['_admin_error'] = 'Votre session a expiré après ' . (self::SESSION_IDLE_TIMEOUT / 60) . ' minutes d\'inactivité. Merci de vous reconnecter.';
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Prolonge la session courante : à appeler sur chaque requête authentifiée
+     * pour repousser l'expiration d'inactivité.
+     */
+    public function touch(): void
+    {
+        if ($this->check()) {
+            $_SESSION['admin_last_activity'] = time();
+        }
     }
 
     public function user(): ?string
@@ -229,6 +281,7 @@ class Auth
 
         $config = require $configPath;
         $config['password_hash'] = $hash;
+        $config['password_changed_at'] = time();
 
         $content = "<?php\nreturn " . var_export($config, true) . ";\n";
         $result = @file_put_contents($configPath, $content);
@@ -237,6 +290,10 @@ class Auth
             clearstatcache();
             if (function_exists('opcache_invalidate')) {
                 @opcache_invalidate($configPath, true);
+            }
+            if ($this->check()) {
+                $_SESSION['admin_auth_time'] = (int) $config['password_changed_at'];
+                $_SESSION['admin_last_activity'] = time();
             }
         }
 
@@ -316,6 +373,8 @@ class Auth
             \Core\Response::redirect(route('admin.login'))->send();
             exit;
         }
+
+        $_SESSION['admin_last_activity'] = time();
     }
 
     /**
