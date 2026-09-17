@@ -8,6 +8,9 @@ use App\Services\Auth;
 use App\Services\MailConfig;
 use App\Services\Mailer;
 use App\Services\SmtpTransport;
+use App\Services\PasswordReset;
+use App\Services\SystemCheck;
+use App\Services\DataExporter;
 
 class AdminController extends Controller
 {
@@ -125,12 +128,15 @@ class AdminController extends Controller
         $flash = $_SESSION['_admin_flash'] ?? null;
         unset($_SESSION['_admin_flash']);
 
+        $tmpCount = app(SystemCheck::class)->tmpFiles()['count'];
+
         return $this->view('admin/dashboard', [
             'title' => 'Tableau de bord — Cours-Réseaux',
             'year' => \date('Y'),
             'admin_email' => $this->auth->user(),
             'modules' => $modules,
             'flash' => $flash,
+            'tmp_count' => $tmpCount,
         ], 'layouts/admin');
     }
 
@@ -263,6 +269,334 @@ class AdminController extends Controller
         }
 
         Response::redirect(route('admin.user'))->send();
+        exit;
+    }
+
+    /* ----------------------- Mot de passe oublié ----------------------- */
+
+    public function forgot(): string
+    {
+        if ($this->auth->check()) {
+            Response::redirect(route('admin.dashboard'))->send();
+            exit;
+        }
+
+        $error = $_SESSION['_admin_error'] ?? null;
+        $success = $_SESSION['_admin_success'] ?? null;
+        unset($_SESSION['_admin_error'], $_SESSION['_admin_success']);
+
+        $reset = app(PasswordReset::class);
+
+        return $this->view('admin/forgot', [
+            'title' => 'Mot de passe oublié — Cours-Réseaux',
+            'year' => \date('Y'),
+            'error' => $error,
+            'success' => $success,
+            'has_pending' => $reset->hasPending(),
+            'seconds_left' => $reset->secondsLeft(),
+            'resend_left' => $reset->resendSecondsLeft(),
+        ], 'layouts/admin');
+    }
+
+    public function doForgot(Request $request): void
+    {
+        if ($this->auth->check()) {
+            Response::redirect(route('admin.dashboard'))->send();
+            exit;
+        }
+
+        if (!$this->validCsrf($request)) {
+            $this->auth->logAttempt('', 'csrf');
+            $_SESSION['_admin_error'] = 'Session expirée. Merci de recharger la page et de réessayer.';
+            Response::redirect(route('admin.forgot'))->send();
+            exit;
+        }
+
+        $reset = app(PasswordReset::class);
+        $result = $reset->request($this->auth->clientIp());
+
+        if (empty($result['ok'])) {
+            $this->auth->logAttempt('', 'reset-request', 'refused');
+            $_SESSION['_admin_error'] = $result['error'] ?? 'Impossible d\'envoyer le code.';
+            Response::redirect(route('admin.forgot'))->send();
+            exit;
+        }
+
+        // Le code est envoyé à l'adresse d'expédition configurée, jamais à une
+        // adresse saisie : on ne révèle aucune information sur le compte.
+        $recipient = (string) config('mail.from', config('mail.to', ''));
+        if ($recipient === '' || filter_var($recipient, FILTER_VALIDATE_EMAIL) === false) {
+            $reset->clear();
+            $this->auth->logAttempt('', 'reset-request', 'no-recipient');
+            $_SESSION['_admin_error'] = 'Aucune adresse d\'expédition valide n\'est configurée (Administration > Mails).';
+            Response::redirect(route('admin.forgot'))->send();
+            exit;
+        }
+
+        if (!$this->sendResetCode($recipient, (string) $result['code'])) {
+            $reset->clear();
+            $this->auth->logAttempt('', 'reset-request', 'send-failed');
+            $_SESSION['_admin_error'] = 'L\'envoi du code a échoué. Vérifiez la configuration des mails puis réessayez.';
+            Response::redirect(route('admin.forgot'))->send();
+            exit;
+        }
+
+        $this->auth->logAttempt('', 'reset-request', 'sent');
+        $_SESSION['_admin_success'] = 'Un code à ' . PasswordReset::CODE_LENGTH . ' chiffres a été envoyé à '
+            . $recipient . '. Il est valable ' . (PasswordReset::CODE_TTL / 60) . ' minutes.';
+        Response::redirect(route('admin.reset'))->send();
+        exit;
+    }
+
+    protected function sendResetCode(string $to, string $code): bool
+    {
+        $appName = (string) config('app.name', 'Cours-Réseaux');
+
+        $subject = $appName . ' — Réinitialisation du mot de passe';
+
+        $body = "Bonjour,\n\n"
+            . "Une réinitialisation du mot de passe de l'administration du site " . $appName . " a été demandée.\n\n"
+            . "Votre code de vérification est : " . $code . "\n\n"
+            . "Saisissez ce code sur la page de réinitialisation dans les 5 minutes. "
+            . "Sans action, la demande expirera automatiquement.\n\n"
+            . "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail : "
+            . "aucune modification n'a été effectuée et votre mot de passe reste inchangé.\n\n"
+            . "— L'équipe " . $appName;
+
+        try {
+            return app(Mailer::class)->sendTo($to, $subject, $body);
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    public function reset(): string
+    {
+        if ($this->auth->check()) {
+            Response::redirect(route('admin.dashboard'))->send();
+            exit;
+        }
+
+        $error = $_SESSION['_admin_error'] ?? null;
+        $success = $_SESSION['_admin_success'] ?? null;
+        unset($_SESSION['_admin_error'], $_SESSION['_admin_success']);
+
+        $reset = app(PasswordReset::class);
+
+        return $this->view('admin/reset', [
+            'title' => 'Nouveau mot de passe — Cours-Réseaux',
+            'year' => \date('Y'),
+            'error' => $error,
+            'success' => $success,
+            'has_pending' => $reset->hasPending(),
+            'seconds_left' => $reset->secondsLeft(),
+            'code_length' => PasswordReset::CODE_LENGTH,
+        ], 'layouts/admin');
+    }
+
+    public function doReset(Request $request): void
+    {
+        if ($this->auth->check()) {
+            Response::redirect(route('admin.dashboard'))->send();
+            exit;
+        }
+
+        if (!$this->validCsrf($request)) {
+            $this->auth->logAttempt('', 'csrf');
+            $_SESSION['_admin_error'] = 'Session expirée. Merci de recharger la page et de réessayer.';
+            Response::redirect(route('admin.reset'))->send();
+            exit;
+        }
+
+        $code = trim((string) $request->body('code', ''));
+        $new = (string) $request->body('new_password', '');
+        $confirm = (string) $request->body('confirm_password', '');
+
+        if ($new !== $confirm) {
+            $_SESSION['_admin_error'] = 'Les deux mots de passe ne correspondent pas.';
+            Response::redirect(route('admin.reset'))->send();
+            exit;
+        }
+
+        $policyError = $this->auth->passwordPolicyError($new);
+        if ($policyError !== '') {
+            $_SESSION['_admin_error'] = $policyError;
+            Response::redirect(route('admin.reset'))->send();
+            exit;
+        }
+
+        $currentHash = config('admin.password_hash', '');
+        if ($currentHash !== '' && password_verify($new, $currentHash)) {
+            $_SESSION['_admin_error'] = 'Le nouveau mot de passe doit être différent du mot de passe actuel.';
+            Response::redirect(route('admin.reset'))->send();
+            exit;
+        }
+
+        // Le code n'est vérifié (et consommé) qu'après validation du mot de
+        // passe, afin qu'une erreur de saisie ne fasse pas perdre le code.
+        $verify = app(PasswordReset::class)->verify($code);
+
+        if (empty($verify['ok'])) {
+            $this->auth->logAttempt('', 'reset-fail', (string) ($verify['error'] ?? ''));
+            $_SESSION['_admin_error'] = $verify['error'] ?? 'Code invalide.';
+            Response::redirect(route('admin.reset'))->send();
+            exit;
+        }
+
+        if (!$this->auth->changePassword($new)) {
+            $this->auth->logAttempt('', 'reset-fail', 'write-error');
+            $_SESSION['_admin_error'] = 'Erreur lors de l\'enregistrement du nouveau mot de passe.';
+            Response::redirect(route('admin.reset'))->send();
+            exit;
+        }
+
+        $this->auth->logAttempt('', 'reset-success');
+        $_SESSION['_admin_success'] = 'Mot de passe réinitialisé avec succès. Vous pouvez maintenant vous connecter.';
+        Response::redirect(route('admin.login'))->send();
+        exit;
+    }
+
+    /* ----------------------- Journal de connexion ---------------------- */
+
+    public function logs(): string
+    {
+        $this->auth->requireAuth();
+
+        $success = $_SESSION['_admin_logs_success'] ?? null;
+        unset($_SESSION['_admin_logs_success']);
+
+        $entries = $this->auth->readLoginLog(200);
+        $countSuccess = 0;
+        $countFail = 0;
+        foreach ($entries as $entry) {
+            if (\in_array($entry['result'], ['success', 'reset-success'], true)) {
+                $countSuccess++;
+            } elseif (\in_array($entry['result'], ['fail', 'throttled', 'csrf', 'timeout', 'reset-fail'], true)) {
+                $countFail++;
+            }
+        }
+
+        return $this->view('admin/logs', [
+            'title' => 'Journal de connexion — Cours-Réseaux',
+            'year' => \date('Y'),
+            'entries' => $entries,
+            'count_success' => $countSuccess,
+            'count_fail' => $countFail,
+            'log_exists' => is_file($this->auth->loginLogPath()),
+            'success' => $success,
+        ], 'layouts/admin');
+    }
+
+    public function clearLogs(Request $request): void
+    {
+        $this->auth->requireAuth();
+
+        if (!$this->validCsrf($request)) {
+            Response::redirect(route('admin.logs'))->send();
+            exit;
+        }
+
+        if ($this->auth->clearLoginLog()) {
+            $_SESSION['_admin_logs_success'] = 'Journal de connexion vidé.';
+        } else {
+            $_SESSION['_admin_logs_success'] = 'Le journal n\'a pas pu être vidé.';
+        }
+
+        Response::redirect(route('admin.logs'))->send();
+        exit;
+    }
+
+    /* ---------------------------- Sauvegarde --------------------------- */
+
+    public function export(): string
+    {
+        $this->auth->requireAuth();
+
+        $summary = app(SystemCheck::class)->summary();
+
+        return $this->view('admin/export', [
+            'title' => 'Sauvegarde — Cours-Réseaux',
+            'year' => \date('Y'),
+            'checks_ok' => $summary['ok'],
+            'checks_fail' => $summary['fail'],
+            'checks_total' => $summary['total'],
+        ], 'layouts/admin');
+    }
+
+    public function downloadExport(Request $request): void
+    {
+        $this->auth->requireAuth();
+
+        if (!$this->validCsrf($request)) {
+            Response::redirect(route('admin.export'))->send();
+            exit;
+        }
+
+        $exporter = app(DataExporter::class);
+        $json = $exporter->toJson($exporter->collect());
+
+        $filename = 'cours-reseaux-sauvegarde-' . \date('Y-m-d-His') . '.json';
+
+        Response::download($json, $filename, 'application/json; charset=utf-8')->send();
+        exit;
+    }
+
+    /* ------------------------------ Système ---------------------------- */
+
+    public function system(): string
+    {
+        $this->auth->requireAuth();
+
+        $check = app(SystemCheck::class);
+        $items = $check->checks();
+
+        $success = $_SESSION['_admin_success'] ?? null;
+        $error = $_SESSION['_admin_error'] ?? null;
+        unset($_SESSION['_admin_success'], $_SESSION['_admin_error']);
+
+        $tmp = $check->tmpFiles();
+
+        return $this->view('admin/system', [
+            'title' => 'Système — Cours-Réseaux',
+            'year' => \date('Y'),
+            'groups' => $check->grouped($items),
+            'summary' => $check->summary($items),
+            'tmp_count' => $tmp['count'],
+            'tmp_size' => $check->humanBytes($tmp['bytes']),
+            'tmp_files' => $tmp['files'],
+            'error' => $error,
+            'success' => $success,
+        ], 'layouts/admin');
+    }
+
+    public function purgeTmp(Request $request): void
+    {
+        $this->auth->requireAuth();
+
+        if (!$this->validCsrf($request)) {
+            $_SESSION['_admin_error'] = 'Votre session a expiré. Merci de réessayer.';
+            Response::redirect(route('admin.system'))->send();
+            exit;
+        }
+
+        $check = app(SystemCheck::class);
+        $result = $check->purgeTmp();
+
+        if ($result['count'] > 0) {
+            $remaining = $check->tmpFiles()['count'];
+            $plural = $result['count'] > 1 ? 's' : '';
+
+            $_SESSION['_admin_success'] = $result['count'] . ' fichier' . $plural
+                . ' temporaire' . $plural . ' supprimé' . $plural
+                . ' (' . $check->humanBytes($result['bytes']) . ' libérés)'
+                . ($remaining > 0
+                    ? '. ' . $remaining . ' fichier' . ($remaining > 1 ? 's' : '') . ' protégé' . ($remaining > 1 ? 's' : '') . ' conservé' . ($remaining > 1 ? 's' : '') . '.'
+                    : '.');
+        } else {
+            $_SESSION['_admin_success'] = 'Aucun fichier temporaire à purger.';
+        }
+
+        Response::redirect(route('admin.system'))->send();
         exit;
     }
 
