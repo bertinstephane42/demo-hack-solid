@@ -55,7 +55,7 @@ function loadConfig(string $name): array
     return $cache[$name];
 }
 
-function config(string $key = null, mixed $default = null): mixed
+function config(?string $key = null, mixed $default = null): mixed
 {
     if ($key === null) {
         return [];
@@ -72,7 +72,7 @@ function config(string $key = null, mixed $default = null): mixed
     return $data;
 }
 
-function app(string $abstract = null, array $parameters = []): mixed
+function app(?string $abstract = null, array $parameters = []): mixed
 {
     $container = Core\Container::getInstance();
     if ($abstract === null) {
@@ -81,7 +81,7 @@ function app(string $abstract = null, array $parameters = []): mixed
     return $container->make($abstract, $parameters);
 }
 
-function view(string $name = null, array $data = []): Core\View
+function view(?string $name = null, array $data = []): Core\View
 {
     return Core\View::make($name ?? '', $data);
 }
