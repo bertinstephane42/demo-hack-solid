@@ -137,7 +137,7 @@ class ContactController extends Controller
         if ($copyRequested) {
             $copyValidated = $this->validator->validate(
                 ['copy_email' => $copyEmail],
-                ['copy_email' => 'required|email|max:254']
+                ['copy_email' => 'required|email|max:150']
             );
             if (!$copyValidated) {
                 $_SESSION['_contact_error'] = 'Pour recevoir une copie, renseignez une adresse mail valide.';
