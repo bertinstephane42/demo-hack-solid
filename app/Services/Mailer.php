@@ -162,7 +162,7 @@ class Mailer
         return $subject;
     }
 
-    protected function sanitizeHeader(string $value): string
+    public function sanitizeHeader(string $value): string
     {
         return (string) preg_replace('/[\r\n\x00-\x1F\x7F]/', '', $value);
     }
