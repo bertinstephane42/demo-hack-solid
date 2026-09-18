@@ -197,6 +197,8 @@ class Auth
             \session_regenerate_id(true);
         }
     }
+
+    /**
      * Détruit la session et renseigne le message d'erreur adéquat si :
      *  - le mot de passe a été modifié depuis l'authentification ;
      *  - la session est restée inactive plus de SESSION_IDLE_TIMEOUT secondes.
