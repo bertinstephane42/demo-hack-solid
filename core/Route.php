@@ -106,13 +106,22 @@ class Route
     {
         $uri = $this->uri;
         $keys = [];
-        $pattern = preg_replace_callback('/\{(\w+)(\?)?\}/', function ($matches) use (&$keys) {
-            $optional = !empty($matches[2]);
-            $keys[] = $matches[1];
+        $pattern = preg_replace_callback('/\/\{(\w+)\?\}|\{(\w+)\?\}|\{(\w+)\}/', function ($m) use (&$keys) {
+            if ($m[1] !== '') {
+                $keys[] = $m[1];
 
-            return $optional
-                ? '([^/]+)?'
-                : '([^/]+)';
+                return '(?:/([^/]+))?';
+            }
+
+            if ($m[2] !== '') {
+                $keys[] = $m[2];
+
+                return '([^/]+)?';
+            }
+
+            $keys[] = $m[3];
+
+            return '([^/]+)';
         }, $uri);
 
         $pattern = '#^' . $pattern . '$#i';

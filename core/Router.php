@@ -138,7 +138,17 @@ class Router
 
     public function getNamedRoute(string $name): ?Route
     {
-        return $this->namedRoutes[$name] ?? null;
+        if (isset($this->namedRoutes[$name])) {
+            return $this->namedRoutes[$name];
+        }
+
+        foreach ($this->routes as $route) {
+            if ($route->getName() === $name) {
+                return $route;
+            }
+        }
+
+        return null;
     }
 
     public function url(string $name, array $parameters = []): string

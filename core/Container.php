@@ -165,10 +165,13 @@ class Container
 
         $dependencies = $this->resolveDependencies($reflector->getParameters(), $parameters);
 
-        return $reflector->invokeArgs(
-            \is_array($callback) ? $callback[0] : null,
-            $dependencies
-        );
+        if ($callback instanceof Closure) {
+            return $reflector->invokeArgs($dependencies);
+        }
+
+        $target = \is_array($callback) ? $callback[0] : null;
+
+        return $reflector->invokeArgs($target, $dependencies);
     }
 
     public function getBindings(): array

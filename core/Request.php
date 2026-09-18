@@ -33,10 +33,10 @@ class Request
         $cookie = $cookie ?? $_COOKIE;
         $files = $files ?? $_FILES;
 
-        $this->method = $this->resolveMethod($server);
         $this->uri = $this->resolveUri($server);
         $this->query = $get;
         $this->body = $post;
+        $this->method = $this->resolveMethod($server);
         $this->headers = $this->resolveHeaders($server);
         $this->cookies = $cookie;
         $this->files = $files;
@@ -167,7 +167,7 @@ class Request
     {
         $requestedWith = $this->header('X-Requested-With');
 
-        return strtolower($requestedWith) === 'xmlhttprequest';
+        return strtolower((string) $requestedWith) === 'xmlhttprequest';
     }
 
     public function isJson(): bool

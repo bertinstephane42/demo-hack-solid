@@ -12,6 +12,8 @@ class View
 
     protected ?string $layout = null;
 
+    protected array $sections = [];
+
     protected static array $sharedData = [];
 
     public function __construct(string $viewPath)
@@ -35,6 +37,9 @@ class View
         if ($layout !== null) {
             $mergedData['content'] = $content;
             $mergedData['slot'] = $content;
+            // Les sections déclarées par la vue enfant (via @section/@endsection)
+            // sont transmises au layout pour que @yield y fonctionne.
+            $mergedData['__sections'] = $this->sections;
 
             return $this->renderView($layout, $mergedData);
         }
@@ -117,9 +122,16 @@ class View
 
         extract($data);
 
+        // État local du mécanisme @section/@yield : la vue à inclure peut
+        // stocker des sections, lues ensuite par le layout via @yield.
+        $__sections = $data['__sections'] ?? [];
+        $__current_section = null;
+
         include $tempFile;
 
         $output = ob_get_clean();
+
+        $this->sections = array_merge($this->sections, $__sections);
 
         if (file_exists($tempFile)) {
             @unlink($tempFile);
