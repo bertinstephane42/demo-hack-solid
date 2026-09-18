@@ -28,16 +28,17 @@ class ApiController extends Controller
     {
         if (!$request->isAjax()) {
             Response::json(['error' => 'Denied access'], 403)->send();
-            return;
+            exit;
         }
 
         $token = $_SERVER['HTTP_X_PUBLIC_TOKEN'] ?? '';
         $expected = config('api.public_token', '');
         if ($token !== $expected) {
             Response::json(['error' => 'Invalid token'], 403)->send();
-            return;
+            exit;
         }
 
         Response::json($this->data)->send();
+        exit;
     }
 }
