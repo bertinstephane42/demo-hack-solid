@@ -11,6 +11,7 @@ use App\Services\SmtpTransport;
 use App\Services\PasswordReset;
 use App\Services\SystemCheck;
 use App\Services\DataExporter;
+use App\Services\LogReader;
 
 class AdminController extends Controller
 {
@@ -125,7 +126,7 @@ class AdminController extends Controller
             ],
             'maintenance' => [
                 'title' => 'Maintenance',
-                'description' => 'Journal de connexion, sauvegarde des données et état du système.',
+                'description' => 'Journaux (connexions, mails), sauvegarde des données et état du système.',
                 'route' => route('admin.system'),
                 'icon' => '&#128736;',
                 'status' => 'Outils de maintenance',
@@ -465,33 +466,68 @@ class AdminController extends Controller
         exit;
     }
 
-    /* ----------------------- Journal de connexion ---------------------- */
+    /* ----------------------------- Journaux ----------------------------- */
 
-    public function logs(): string
+    /**
+     * Section « Journaux » : deux onglets, le journal de connexion
+     * (storage/logs/login.log) et les messages envoyés depuis la page de
+     * contact (storage/logs/contact.log), du plus récent au plus ancien.
+     */
+    public function logs(Request $request): string
     {
         $this->auth->requireAuth();
 
         $success = $_SESSION['_admin_logs_success'] ?? null;
         unset($_SESSION['_admin_logs_success']);
 
-        $entries = $this->auth->readLoginLog(200);
-        $countSuccess = 0;
-        $countFail = 0;
-        foreach ($entries as $entry) {
-            if (\in_array($entry['result'], ['success', 'reset-success'], true)) {
-                $countSuccess++;
-            } elseif (\in_array($entry['result'], ['fail', 'throttled', 'csrf', 'timeout', 'reset-fail'], true)) {
-                $countFail++;
-            }
+        $reader = app(LogReader::class);
+        $tabs = $reader->tabs();
+
+        $current = (string) $request->query('f', 'login');
+        if (!$reader->isTab($current)) {
+            $current = 'login';
         }
 
+        $all = $reader->entries($current);
+        $total = count($all);
+
+        $countSuccess = 0;
+        $countFail = 0;
+        $countSent = 0;
+        $countFailed = 0;
+        if ($current === 'login') {
+            $counts = $reader->loginCounts($all);
+            $countSuccess = $counts['success'];
+            $countFail = $counts['fail'];
+        } else {
+            $counts = $reader->contactCounts($all);
+            $countSent = $counts['sent'];
+            $countFailed = $counts['failed'];
+        }
+
+        $perPage = 25;
+        $pages = max(1, (int) ceil($total / $perPage));
+        $page = max(1, (int) $request->query('page', 1));
+        $page = min($page, $pages);
+        $offset = ($page - 1) * $perPage;
+        $entries = array_slice($all, $offset, $perPage);
+
         return $this->view('admin/logs', [
-            'title' => 'Journal de connexion — Cours-Réseaux',
+            'title' => 'Journaux — Cours-Réseaux',
             'year' => \date('Y'),
+            'tabs' => $tabs,
+            'current' => $current,
             'entries' => $entries,
+            'total' => $total,
+            'page' => $page,
+            'pages' => $pages,
+            'from' => $total > 0 ? $offset + 1 : 0,
+            'to' => min($total, $offset + $perPage),
+            'per_page' => $perPage,
             'count_success' => $countSuccess,
             'count_fail' => $countFail,
-            'log_exists' => is_file($this->auth->loginLogPath()),
+            'count_sent' => $countSent,
+            'count_failed' => $countFailed,
             'success' => $success,
         ], 'layouts/admin');
     }
@@ -500,18 +536,27 @@ class AdminController extends Controller
     {
         $this->auth->requireAuth();
 
+        $tab = (string) $request->body('f', 'login');
+        $reader = app(LogReader::class);
+        if (!$reader->isTab($tab)) {
+            $tab = 'login';
+        }
+
+        $redirect = route('admin.logs') . '?f=' . urlencode($tab);
+
         if (!$this->validCsrf($request)) {
-            Response::redirect(route('admin.logs'))->send();
+            $_SESSION['_admin_logs_success'] = 'Session expirée. Merci de recharger la page et de réessayer.';
+            Response::redirect($redirect)->send();
             exit;
         }
 
-        if ($this->auth->clearLoginLog()) {
-            $_SESSION['_admin_logs_success'] = 'Journal de connexion vidé.';
+        if ($reader->clear($tab)) {
+            $_SESSION['_admin_logs_success'] = 'Journal « ' . $reader->tabLabel($tab) . ' » vidé.';
         } else {
-            $_SESSION['_admin_logs_success'] = 'Le journal n\'a pas pu être vidé.';
+            $_SESSION['_admin_logs_success'] = 'Le journal n\'a pas pu être vidé (droits d\'écriture sur storage/logs manquants).';
         }
 
-        Response::redirect(route('admin.logs'))->send();
+        Response::redirect($redirect)->send();
         exit;
     }
 
