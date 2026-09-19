@@ -34,6 +34,7 @@ require_once __DIR__ . '/../app/Services/Auth.php';
 require_once __DIR__ . '/../app/Services/PasswordReset.php';
 require_once __DIR__ . '/../app/Services/SystemCheck.php';
 require_once __DIR__ . '/../app/Services/DataExporter.php';
+require_once __DIR__ . '/../app/Services/LogReader.php';
 require_once __DIR__ . '/../app/Models/SitemapMenu.php';
 require_once __DIR__ . '/../app/Http/Controllers/Controller.php';
 require_once __DIR__ . '/../app/Http/Controllers/HomeController.php';
