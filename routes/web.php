@@ -48,7 +48,7 @@ $router->post('/admin/password', AdminController::class . '@doPassword');
 $router->get('/admin/user', AdminController::class . '@user')->name('admin.user');
 $router->post('/admin/user', AdminController::class . '@doUser');
 
-// Administration — module "Journal de connexion"
+// Administration — module "Journaux" (connexions, messages de contact)
 $router->get('/admin/logs', AdminController::class . '@logs')->name('admin.logs');
 $router->post('/admin/logs/clear', AdminController::class . '@clearLogs')->name('admin.logs.clear');
 
