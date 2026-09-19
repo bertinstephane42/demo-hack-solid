@@ -17,7 +17,7 @@
                             <div class="display-6 mb-2"><?= $module['icon'] ?></div>
                             <h5 class="card-title fw-bold" style="color:#003878;"><?= htmlspecialchars($module['title']) ?></h5>
                             <?php if (($module['vertical_tools'] ?? false) === true): ?>
-                                <p class="card-text text-muted small">Journal de connexion, sauvegarde des données et état du système</p>
+                                <p class="card-text text-muted small">Journaux (connexions, mails), sauvegarde des données et état du système</p>
                                 <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse"
                                         data-bs-target="#maintenanceTools" aria-expanded="false" aria-controls="maintenanceTools">
                                     Outils de maintenance
@@ -25,7 +25,7 @@
                                 <div class="collapse mt-3 text-start" id="maintenanceTools">
                                     <div class="d-grid gap-2">
                                         <a href="<?= route('admin.system') ?>" class="btn btn-outline-primary btn-sm">Système</a>
-                                        <a href="<?= route('admin.logs') ?>" class="btn btn-outline-primary btn-sm">Journal de connexion</a>
+                                        <a href="<?= route('admin.logs') ?>" class="btn btn-outline-primary btn-sm">Journaux</a>
                                         <a href="<?= route('admin.export') ?>" class="btn btn-outline-primary btn-sm">Sauvegarde</a>
                                         <form action="<?= route('admin.system.purge-tmp') ?>" method="POST"
                                               onsubmit="return confirm('Purger tous les fichiers temporaires de storage/tmp ?');">
