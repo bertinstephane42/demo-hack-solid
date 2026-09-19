@@ -7,6 +7,7 @@ use App\Services\Validator;
 use App\Services\Mailer;
 use App\Services\MailConfig;
 use App\Services\Auth;
+use App\Services\LogReader;
 use App\Http\Kernel;
 
 class AppServiceProvider extends ServiceProvider
@@ -35,6 +36,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(Auth::class, function () {
             return new Auth();
+        });
+
+        $this->app->singleton(LogReader::class, function () {
+            return new LogReader();
         });
 
         $this->app->singleton(\Core\Router::class, function () {
