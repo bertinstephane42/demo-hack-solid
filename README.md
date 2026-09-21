@@ -27,7 +27,7 @@ Réécriture complète de l'application pédagogique cours-reseaux.fr suivant le
 │   ├── Models/                  # Modèles de données (SitemapMenu — dépôt en mémoire)
 │   ├── Providers/               # Service Providers (App, Route, View)
 │   └── Services/                # Services métier (Auth, Mailer, LogReader, …)
-├── config/                      # Configuration par fichier (app, admin, mail, rate, security)
+├── config/                      # Configuration par fichier (app, admin, mail, rate, security, turnstile)
 ├── routes/
 │   └── web.php                  # Toutes les routes (publiques + administration)
 ├── resources/views/             # Templates Blade-like (layouts/, admin/, partials/, pages publiques)
@@ -71,8 +71,29 @@ Fichiers de configuration :
 | `config/mail.php` | Expéditeur, destinataire, logs de débogage, quotas d'envoi |
 | `config/rate.php` | Limitation de débit par IP (max par fenêtre) |
 | `config/security.php` | En-têtes de sécurité et politique CSP |
+| `config/turnstile.php` | Clés Cloudflare Turnstile (`TURNSTILE_SITEKEY` / `TURNSTILE_SECRET`) |
 
-Variables d'environnement notables : `MAIL_FROM`, `MAIL_TO`, `MAIL_LOG_ENABLED`, `RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW`, `CSP_*`, `APP_DEBUG`, `APP_ENV`.
+Variables d'environnement notables : `MAIL_FROM`, `MAIL_TO`, `MAIL_LOG_ENABLED`, `RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW`, `CSP_*`, `APP_DEBUG`, `APP_ENV`, `TURNSTILE_SITEKEY`, `TURNSTILE_SECRET`.
+
+### Cloudflare Turnstile (anti-robots du formulaire de contact)
+
+Le formulaire de contact utilise **Cloudflare Turnstile** lorsque les clés sont
+configurées, avec repli automatique sur le calcul arithmétique si l'API est
+injoignable. Tant que les deux clés sont absentes/vides, le comportement reste
+identique à l'ancien (calcul arithmétique uniquement).
+
+Activation :
+
+1. Créer un widget Turnstile sur le dashboard Cloudflare (Type « Managed »).
+   Autoriser les noms d'hôtes `cours-reseaux.fr`, `www.cours-reseaux.fr`,
+   `localhost` et `127.0.0.1`.
+2. Renseigner dans `.env` (racine du site, invisible depuis le web) :
+   `TURNSTILE_SITEKEY=0x4AAAA…` et `TURNSTILE_SECRET=0x4AAAA…`.
+3. Vider la mémoire de PHP (le service lit la config au démarrage) si un cache
+   d'opcode type OPcache est actif.
+4. La CSP ajoute `https://challenges.cloudflare.com` à `script-src`
+   automatiquement (`config/security.php`) ; sinon, sauf si `.env` surcharge
+   `CSP_SCRIPT_SRC` sans cette origine.
 
 Déploiement :
 
@@ -88,7 +109,7 @@ Déploiement :
 - En-têtes de sécurité + `Content-Security-Policy` (via `config/security.php`).
 - CSRF sur toutes les actions POST de l'administration (`csrf_token()` / `csrf_field()`).
 - Limitation de débit par IP (POST uniquement), quota verrouillé par fichier dans `storage/tmp/`.
-- Formulaire de contact : jeton de session, minuterie anti-soumission rapide, honeypot, calcul anti-robots, validation stricte des champs.
+- Formulaire de contact : jeton de session, minuterie anti-soumission rapide, honeypot, Cloudflare Turnstile (ou calcul anti-robots de repli quand l'API est injoignable), validation stricte des champs.
 - Mots de passe stockés en bcrypt ; politique stricte imposée côté administration.
 
 ## Routes
@@ -156,6 +177,7 @@ La lecture est assurée par `app/Services/LogReader.php` : fenêtre de lecture p
 | `SystemCheck` | Diagnostic système (dossiers, fichiers, mail) |
 | `DataExporter` | Sauvegarde de la configuration en JSON |
 | `LogReader` | Lecture des journaux (login + contact) pour l'administration |
+| `Turnstile` | Vérification du captcha Cloudflare (tri-état ok / invalide / API injoignable, bascule calcul arithmétique) |
 | `SitemapMenu` (Model) | Arborescence du plan du site |
 
 ## Comparaison avant/après
