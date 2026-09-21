@@ -6,17 +6,20 @@ use Core\Request;
 use Core\Response;
 use App\Services\Validator;
 use App\Services\Mailer;
+use App\Services\Turnstile;
 
 class ContactController extends Controller
 {
     protected Validator $validator;
     protected Mailer $mailer;
+    protected Turnstile $turnstile;
 
-    public function __construct(Validator $validator, Mailer $mailer)
+    public function __construct(Validator $validator, Mailer $mailer, Turnstile $turnstile)
     {
         parent::__construct();
         $this->validator = $validator;
         $this->mailer = $mailer;
+        $this->turnstile = $turnstile;
     }
 
     public function show(): string
@@ -54,6 +57,7 @@ class ContactController extends Controller
             'form_time' => $formTime,
             'captcha_a' => $captchaA,
             'captcha_b' => $captchaB,
+            'turnstile_sitekey' => $this->turnstile->siteKey(),
         ], 'layouts/contact');
     }
 
@@ -70,20 +74,41 @@ class ContactController extends Controller
         $time = (int) $request->body('_time', 0);
         $honeypot = $request->body('website');
         $captchaAnswer = $request->body('captcha');
+        $turnstileToken = $request->body('cf-turnstile-response');
 
         $validToken = ($token !== null && \hash_equals((string) $sessionToken, (string) $token));
         $elapsed = \time() - $sessionTime;
         $timingOk = $sessionTime > 0 && $elapsed >= 3;
         $validCaptcha = ($sessionCaptcha !== null && (int) $captchaAnswer === (int) $sessionCaptcha);
+        $turnstileUsed = $this->turnstile->isEnabled() && $turnstileToken !== null && $turnstileToken !== '';
+        $verdict = null;
+        $proof = '';
+        if ($turnstileUsed) {
+            $verdict = $this->turnstile->verify($turnstileToken);
+            if ($verdict === Turnstile::VERIFY_OK) {
+                $proofOk = true;
+                $proof = 'turnstile=ok';
+            } elseif ($verdict === Turnstile::VERIFY_INVALID) {
+                $proofOk = false;
+                $proof = 'turnstile=fail';
+            } else {
+                $proofOk = $validCaptcha;
+                $proof = 'turnstile=unavailable:math=' . ($validCaptcha ? 'ok' : 'fail');
+            }
+        } else {
+            $proofOk = $validCaptcha;
+            $proof = 'math=' . ($validCaptcha ? 'ok' : 'fail');
+        }
         $isBot = trim((string) $honeypot) !== '';
         $isHuman = $validToken && $timingOk && !$isBot;
 
         $this->logContact(sprintf(
-            'gate token=%s elapsed=%ds honeypot=%s captcha=%s human=%s',
+            'gate token=%s elapsed=%ds honeypot=%s captcha=%s proof=%s human=%s',
             $validToken ? 'ok' : 'fail',
             $elapsed,
             $isBot ? 'filled' : 'empty',
-            $validCaptcha ? 'ok' : 'fail',
+            $validCaptcha ? 'ok' : ($turnstileUsed ? 'skip' : 'fail'),
+            $proof,
             $isHuman ? 'yes' : 'no'
         ));
 
@@ -97,8 +122,12 @@ class ContactController extends Controller
             exit;
         }
 
-        if (!$validCaptcha) {
-            $_SESSION['_contact_error'] = 'Le résultat du calcul est incorrect. Votre message n\'a pas été envoyé, merci de réessayer.';
+        if (!$proofOk) {
+            if ($turnstileUsed && $verdict === Turnstile::VERIFY_INVALID) {
+                $_SESSION['_contact_error'] = 'La vérification anti-robot a échoué. Merci de réessayer.';
+            } else {
+                $_SESSION['_contact_error'] = 'Le résultat du calcul est incorrect. Votre message n\'a pas été envoyé, merci de réessayer.';
+            }
             Response::redirect(route('contact'))->send();
             exit;
         }
