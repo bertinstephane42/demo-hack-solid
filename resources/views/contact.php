@@ -22,8 +22,20 @@
                     <label for="emailInput">Votre email</label>
                 </div>
                 <div class="mb-4">
-                    <label for="captchaInput" class="form-label">Combien font <?= (int) $captcha_a ?> + <?= (int) $captcha_b ?> ?</label>
-                    <input type="text" name="captcha" class="form-control" id="captchaInput" inputmode="numeric" autocomplete="off" required>
+                    <?php if (!empty($turnstile_sitekey)): ?>
+                        <div class="cf-turnstile" id="turnstileWidget" data-sitekey="<?= htmlspecialchars($turnstile_sitekey) ?>" data-theme="light" data-language="fr" data-error-callback="cr_turnstile_error"></div>
+                        <div id="captchaFallback" style="display:none;">
+                            <label for="captchaFallbackInput" class="form-label mt-3">Combien font <?= (int) $captcha_a ?> + <?= (int) $captcha_b ?> ?</label>
+                            <input type="text" name="captcha" id="captchaFallbackInput" class="form-control" inputmode="numeric" autocomplete="off" disabled>
+                        </div>
+                        <noscript>
+                            <label for="captchaInput" class="form-label">Combien font <?= (int) $captcha_a ?> + <?= (int) $captcha_b ?> ?</label>
+                            <input type="text" name="captcha" class="form-control" id="captchaInput" inputmode="numeric" autocomplete="off" required>
+                        </noscript>
+                    <?php else: ?>
+                        <label for="captchaInput" class="form-label">Combien font <?= (int) $captcha_a ?> + <?= (int) $captcha_b ?> ?</label>
+                        <input type="text" name="captcha" class="form-control" id="captchaInput" inputmode="numeric" autocomplete="off" required>
+                    <?php endif; ?>
                 </div>
                 <div class="form-floating mb-4">
                     <textarea name="message" class="form-control" id="messageInput" placeholder="Votre message" style="height:160px" required minlength="7"></textarea>
