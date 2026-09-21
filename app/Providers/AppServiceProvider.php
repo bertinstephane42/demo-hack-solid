@@ -8,6 +8,7 @@ use App\Services\Mailer;
 use App\Services\MailConfig;
 use App\Services\Auth;
 use App\Services\LogReader;
+use App\Services\Turnstile;
 use App\Http\Kernel;
 
 class AppServiceProvider extends ServiceProvider
@@ -40,6 +41,10 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(LogReader::class, function () {
             return new LogReader();
+        });
+
+        $this->app->singleton(Turnstile::class, function () {
+            return new Turnstile();
         });
 
         $this->app->singleton(\Core\Router::class, function () {
