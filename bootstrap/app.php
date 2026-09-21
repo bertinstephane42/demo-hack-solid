@@ -29,6 +29,7 @@ require_once __DIR__ . '/../app/Http/Kernel.php';
 require_once __DIR__ . '/../app/Services/Validator.php';
 require_once __DIR__ . '/../app/Services/MailConfig.php';
 require_once __DIR__ . '/../app/Services/Mailer.php';
+require_once __DIR__ . '/../app/Services/Turnstile.php';
 require_once __DIR__ . '/../app/Services/SmtpTransport.php';
 require_once __DIR__ . '/../app/Services/Auth.php';
 require_once __DIR__ . '/../app/Services/PasswordReset.php';
