@@ -77,5 +77,35 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="<?= asset('js/index.js') ?>"></script>
+    <?php if (!empty($turnstile_sitekey)): ?>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        <script>
+            (function () {
+                var wrap = document.getElementById('turnstileWidget');
+                if (!wrap) { return; }
+                var revealed = false;
+                function revealFallback() {
+                    if (revealed) { return; }
+                    revealed = true;
+                    var fb = document.getElementById('captchaFallback');
+                    var inp = document.getElementById('captchaFallbackInput');
+                    if (fb) { fb.style.display = 'block'; }
+                    if (inp) { inp.disabled = false; }
+                }
+                window.cr_turnstile_error = revealFallback;
+                if (wrap.childElementCount === 0) {
+                    setTimeout(function () {
+                        var w = document.getElementById('turnstileWidget');
+                        if (w && w.childElementCount === 0) { revealFallback(); }
+                    }, 6000);
+                }
+                document.addEventListener('DOMContentLoaded', function () {
+                    if (document.querySelector('.alert-danger') && document.getElementById('turnstileWidget')) {
+                        revealFallback();
+                    }
+                });
+            })();
+        </script>
+    <?php endif; ?>
 </body>
 </html>
