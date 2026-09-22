@@ -25,6 +25,12 @@ class LogReader
         'contact' => 'Messages de contact',
     ];
 
+    /** Résultats de connexion considérés comme des réussites. */
+    protected const LOGIN_SUCCESS = ['success', 'reset-success'];
+
+    /** Résultats de connexion considérés comme des échecs ou blocages. */
+    protected const LOGIN_FAILURE = ['fail', 'throttled', 'csrf', 'timeout', 'reset-fail'];
+
     public function dir(): string
     {
         return __DIR__ . '/../../storage/logs';
@@ -93,13 +99,53 @@ class LogReader
         $success = 0;
         $fail = 0;
         foreach ($entries as $entry) {
-            if (\in_array($entry['result'], ['success', 'reset-success'], true)) {
+            if (\in_array($entry['result'], self::LOGIN_SUCCESS, true)) {
                 $success++;
-            } elseif (\in_array($entry['result'], ['fail', 'throttled', 'csrf', 'timeout', 'reset-fail'], true)) {
+            } elseif (\in_array($entry['result'], self::LOGIN_FAILURE, true)) {
                 $fail++;
             }
         }
         return ['success' => $success, 'fail' => $fail];
+    }
+
+    /**
+     * Les résultats de connexion retenus par un filtre :
+     *  - 'success' : réussites (success, reset-success) ;
+     *  - 'fail' : échecs et blocages (fail, throttled, csrf, timeout, reset-fail).
+     * Toute autre valeur (ou chaîne vide) signifie « aucun filtre ».
+     *
+     * @return list<string>|null
+     */
+    public function loginResultSet(string $filter): ?array
+    {
+        if ($filter === 'success') {
+            return self::LOGIN_SUCCESS;
+        }
+        if ($filter === 'fail') {
+            return self::LOGIN_FAILURE;
+        }
+
+        return null;
+    }
+
+    /**
+     * Filtre des entrées de connexion par groupe de résultats.
+     * 'success' ou 'fail' ; toute autre valeur ne filtre pas.
+     *
+     * @param list<array> $entries
+     * @return list<array>
+     */
+    public function filterLoginResults(array $entries, string $resultFilter): array
+    {
+        $allowed = $this->loginResultSet($resultFilter);
+        if ($allowed === null) {
+            return $entries;
+        }
+
+        return array_values(array_filter(
+            $entries,
+            static fn (array $entry): bool => \in_array((string) ($entry['result'] ?? ''), $allowed, true),
+        ));
     }
 
     /**
