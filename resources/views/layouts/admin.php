@@ -76,5 +76,81 @@
         });
     });
     </script>
+    <div class="modal fade" id="appConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="appConfirmTitle" style="color:#003878;">Confirmation</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" id="appConfirmMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-danger fw-bold" id="appConfirmOk">Confirmer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+    (function () {
+        'use strict';
+        var modalEl = document.getElementById('appConfirmModal');
+        if (!modalEl || typeof bootstrap === 'undefined') {
+            return;
+        }
+        var titleEl = document.getElementById('appConfirmTitle');
+        var msgEl = document.getElementById('appConfirmMessage');
+        var okBtn = document.getElementById('appConfirmOk');
+        var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        var currentAction = null;
+
+        window.confirmAction = function (message, onConfirm, options) {
+            options = options || {};
+            if (titleEl) {
+                titleEl.textContent = options.title || 'Confirmation';
+            }
+            msgEl.textContent = message;
+            okBtn.textContent = options.okLabel || 'Confirmer';
+            okBtn.className = 'btn fw-bold ' + (options.tone === 'primary' ? 'btn-primary' : 'btn-danger');
+            okBtn.setAttribute('aria-label', okBtn.textContent);
+            currentAction = onConfirm;
+            modal.show();
+        };
+
+        window.alertMessage = function (message, title) {
+            if (titleEl) {
+                titleEl.textContent = title || 'Information';
+            }
+            msgEl.textContent = message;
+            okBtn.textContent = 'Fermer';
+            okBtn.className = 'btn btn-primary fw-bold';
+            okBtn.setAttribute('aria-label', 'Fermer');
+            currentAction = null;
+            modal.show();
+        };
+
+        okBtn.addEventListener('click', function () {
+            var action = currentAction;
+            currentAction = null;
+            modal.hide();
+            if (typeof action === 'function') {
+                action();
+            }
+        });
+
+        document.addEventListener('submit', function (event) {
+            var form = event.target;
+            if (!(form instanceof Element) || !form.hasAttribute('data-confirm')) {
+                return;
+            }
+            event.preventDefault();
+            confirmAction(form.getAttribute('data-confirm'), function () {
+                form.submit();
+            }, { tone: form.getAttribute('data-confirm-tone') || 'danger' });
+        }, true);
+    })();
+    </script>
 </body>
 </html>
