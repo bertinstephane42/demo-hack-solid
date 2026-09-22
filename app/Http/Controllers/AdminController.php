@@ -489,7 +489,7 @@ class AdminController extends Controller
         }
 
         $all = $reader->entries($current);
-        $total = count($all);
+        $totalAll = count($all);
 
         $countSuccess = 0;
         $countFail = 0;
@@ -503,6 +503,20 @@ class AdminController extends Controller
             $counts = $reader->contactCounts($all);
             $countSent = $counts['sent'];
             $countFailed = $counts['failed'];
+        }
+
+        $rt = $current === 'login' ? (string) $request->query('rt', '') : '';
+        if ($reader->loginResultSet($rt) === null) {
+            $rt = '';
+        }
+        if ($rt !== '') {
+            $all = $reader->filterLoginResults($all, $rt);
+        }
+
+        $total = count($all);
+
+        if ($current === 'login') {
+            $tabs['login']['count'] = $total;
         }
 
         $perPage = 25;
@@ -528,6 +542,8 @@ class AdminController extends Controller
             'count_fail' => $countFail,
             'count_sent' => $countSent,
             'count_failed' => $countFailed,
+            'total_all' => $totalAll,
+            'filter_rt' => $rt,
             'success' => $success,
         ], 'layouts/admin');
     }
