@@ -17,9 +17,12 @@
                     envoi des mails, API, limitation de débit et sécurité. Les secrets (mot de passe
                     administrateur, mot de passe SMTP et jeton d'API) sont retirés de l'export.
                 </p>
-                <form action="<?= route('admin.export.download') ?>" method="POST">
+                <form action="<?= route('admin.export.download') ?>" method="POST" id="backupDownloadForm">
                     <?= csrf_field() ?>
-                    <button type="submit" class="btn btn-primary fw-bold">Télécharger la sauvegarde complète</button>
+                    <button type="button" class="btn btn-primary fw-bold"
+                            data-bs-toggle="modal" data-bs-target="#backupConfirmModal">
+                        Télécharger la sauvegarde complète
+                    </button>
                 </form>
             </div>
         </div>
@@ -27,5 +30,32 @@
         <p class="text-muted small mt-3 mb-0">
             Le fichier téléchargé peut être conservé hors ligne. Aucune donnée n'est envoyée à un service tiers.
         </p>
+    </div>
+</div>
+
+<div class="modal fade" id="backupConfirmModal" tabindex="-1" aria-labelledby="backupConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="backupConfirmModalLabel" style="color:#003878;">Télécharger la sauvegarde complète ?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small mb-2">La sauvegarde exporte au format JSON :</p>
+                <ul class="small text-muted ps-3 mb-3">
+                    <li>l'application et la configuration associée ;</li>
+                    <li>le compte administrateur, l'envoi des mails, l'API, la limitation de débit et la sécurité.</li>
+                </ul>
+                <p class="small mb-0">
+                    Les secrets (mot de passe administrateur, mots de passe SMTP, jetons d'API) sont retirés de l'export.
+                    Aucune donnée n'est envoyée à un service tiers.
+                    Souhaitez-vous télécharger ce fichier ?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" form="backupDownloadForm" class="btn btn-primary fw-bold">Télécharger la sauvegarde</button>
+            </div>
+        </div>
     </div>
 </div>

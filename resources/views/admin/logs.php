@@ -9,6 +9,9 @@ $pages = max(1, (int) ($pages ?? 1));
 $from = (int) ($from ?? 0);
 $to = (int) ($to ?? 0);
 $perPage = (int) ($per_page ?? 25);
+$filter_rt = $filter_rt ?? '';
+$rtQuery = $filter_rt !== '' ? '&rt=' . urlencode($filter_rt) : '';
+$total_all = (int) ($total_all ?? $total);
 ?>
 <div class="row justify-content-center">
     <div class="col-lg-11">
@@ -24,9 +27,23 @@ $perPage = (int) ($per_page ?? 25);
         <?php endif; ?>
 
         <?php if ($current === 'login'): ?>
+            <?php if ($filter_rt !== ''): ?>
+                <div class="alert alert-info py-2 px-3 d-flex align-items-center gap-2 small">
+                    <i class="bi bi-funnel-fill"></i>
+                    <span>
+                        Filtre actif :
+                        <strong><?= $filter_rt === 'success' ? 'Connexions réussies' : 'Échecs / blocages' ?></strong>
+                        — <?= (int) $total ?> entrée<?= (int) $total > 1 ? 's' : '' ?>.
+                    </span>
+                    <a href="<?= $base ?>?f=login" class="btn btn-sm btn-outline-secondary ms-auto">Tout afficher</a>
+                </div>
+            <?php endif; ?>
             <div class="row g-3 mb-4">
                 <div class="col-sm-4">
-                    <div class="card border-0 shadow-sm text-center">
+                    <div class="card text-center h-100<?= $filter_rt === 'success' ? ' border-2 border-primary shadow' : ' border-0 shadow-sm' ?>" role="button" tabindex="0" style="cursor:pointer;"
+                         data-login-filter
+                         data-login-filter-url="<?= $base ?>?f=login&rt=success"
+                         data-login-filter-message="Souhaitez-vous filtrer la vue sur les <?= (int) $count_success ?> connexions réussies ?">
                         <div class="card-body">
                             <div class="fs-4 fw-bold text-success"><?= (int) $count_success ?></div>
                             <div class="text-muted small">Connexions réussies</div>
@@ -34,7 +51,10 @@ $perPage = (int) ($per_page ?? 25);
                     </div>
                 </div>
                 <div class="col-sm-4">
-                    <div class="card border-0 shadow-sm text-center">
+                    <div class="card text-center h-100<?= $filter_rt === 'fail' ? ' border-2 border-primary shadow' : ' border-0 shadow-sm' ?>" role="button" tabindex="0" style="cursor:pointer;"
+                         data-login-filter
+                         data-login-filter-url="<?= $base ?>?f=login&rt=fail"
+                         data-login-filter-message="Souhaitez-vous filtrer la vue sur les <?= (int) $count_fail ?> échecs et blocages ?">
                         <div class="card-body">
                             <div class="fs-4 fw-bold text-danger"><?= (int) $count_fail ?></div>
                             <div class="text-muted small">Échecs / blocages</div>
@@ -42,9 +62,12 @@ $perPage = (int) ($per_page ?? 25);
                     </div>
                 </div>
                 <div class="col-sm-4">
-                    <div class="card border-0 shadow-sm text-center">
+                    <div class="card text-center h-100<?= $filter_rt === '' ? ' border-2 border-primary shadow' : ' border-0 shadow-sm' ?>" role="button" tabindex="0" style="cursor:pointer;"
+                         data-login-filter
+                         data-login-filter-url="<?= $base ?>?f=login"
+                         data-login-filter-message="Souhaitez-vous afficher l'ensemble des <?= (int) $total_all ?> entrées ?">
                         <div class="card-body">
-                            <div class="fs-4 fw-bold" style="color:#003878;"><?= (int) $total ?></div>
+                            <div class="fs-4 fw-bold" style="color:#003878;"><?= (int) $total_all ?></div>
                             <div class="text-muted small">Événements enregistrés</div>
                         </div>
                     </div>
@@ -237,22 +260,22 @@ $perPage = (int) ($per_page ?? 25);
             <nav class="mt-3" aria-label="Pagination des journaux">
                 <ul class="pagination pagination-sm justify-content-center flex-wrap">
                     <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                        <a class="page-link" href="<?= $base ?>?f=<?= urlencode($current) ?>&page=<?= max(1, $page - 1) ?>">Précédent</a>
+                        <a class="page-link" href="<?= $base ?>?f=<?= urlencode($current) ?>&page=<?= max(1, $page - 1) ?><?= $rtQuery ?>">Précédent</a>
                     </li>
                     <?php for ($p = $start; $p <= $end; $p++): ?>
                         <li class="page-item <?= $p === $page ? 'active' : '' ?>">
-                            <a class="page-link" href="<?= $base ?>?f=<?= urlencode($current) ?>&page=<?= $p ?>"><?= $p ?></a>
+                            <a class="page-link" href="<?= $base ?>?f=<?= urlencode($current) ?>&page=<?= $p ?><?= $rtQuery ?>"><?= $p ?></a>
                         </li>
                     <?php endfor; ?>
                     <li class="page-item <?= $page >= $pages ? 'disabled' : '' ?>">
-                        <a class="page-link" href="<?= $base ?>?f=<?= urlencode($current) ?>&page=<?= min($pages, $page + 1) ?>">Suivant</a>
+                        <a class="page-link" href="<?= $base ?>?f=<?= urlencode($current) ?>&page=<?= min($pages, $page + 1) ?><?= $rtQuery ?>">Suivant</a>
                     </li>
                 </ul>
             </nav>
         <?php endif; ?>
 
         <form action="<?= route('admin.logs.clear') ?>" method="POST" class="mt-3"
-              onsubmit="return confirm('Vider définitivement <?= $current === 'login' ? 'le journal de connexion' : 'le journal des messages de contact' ?> ? Cette action est irréversible.');">
+              data-confirm="Vider définitivement <?= $current === 'login' ? 'le journal de connexion' : 'le journal des messages de contact' ?> ? Cette action est irréversible.">
             <?= csrf_field() ?>
             <input type="hidden" name="f" value="<?= htmlspecialchars($current) ?>">
             <button type="submit" class="btn btn-outline-danger btn-sm">Vider ce journal</button>
@@ -346,3 +369,60 @@ $perPage = (int) ($per_page ?? 25);
     });
 })();
 </script>
+<?php if ($current === 'login'): ?>
+<div class="modal fade" id="loginFilterModal" tabindex="-1" aria-labelledby="loginFilterModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="loginFilterModalLabel" style="color:#003878;">Filtrer le journal de connexion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0" id="loginFilterMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                <a href="" id="loginFilterConfirm" class="btn btn-primary btn-sm">Filtrer la vue</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+    var cards = document.querySelectorAll('[data-login-filter]');
+    if (!cards.length) {
+        return;
+    }
+    var confirmBtn = document.getElementById('loginFilterConfirm');
+    var message = document.getElementById('loginFilterMessage');
+    var modal = document.getElementById('loginFilterModal');
+
+    cards.forEach(function (card) {
+        card.addEventListener('click', function () {
+            var url = card.getAttribute('data-login-filter-url');
+            var text = card.getAttribute('data-login-filter-message');
+            confirmBtn.setAttribute('href', url);
+            message.textContent = text;
+            try {
+                bootstrap.Modal.getOrCreateInstance(modal).show();
+            } catch (e) {
+                window.location.href = url;
+            }
+        });
+        card.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                card.click();
+            }
+        });
+    });
+
+    confirmBtn.addEventListener('click', function (event) {
+        event.preventDefault();
+        window.location.href = confirmBtn.getAttribute('href');
+    });
+})();
+</script>
+<?php endif; ?>

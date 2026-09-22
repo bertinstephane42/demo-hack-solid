@@ -45,7 +45,7 @@
                         </ul>
                     </details>
                     <form action="<?= route('admin.system.purge-tmp') ?>" method="POST"
-                          onsubmit="return confirm('Purger tous les fichiers temporaires de storage/tmp ?');">
+                          data-confirm="Purger tous les fichiers temporaires de storage/tmp ?">
                         <?= csrf_field() ?>
                         <button type="submit" class="btn btn-outline-danger btn-sm">Purger les fichiers temporaires</button>
                     </form>

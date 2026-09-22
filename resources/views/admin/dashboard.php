@@ -28,7 +28,7 @@
                                         <a href="<?= route('admin.logs') ?>" class="btn btn-outline-primary btn-sm">Journaux</a>
                                         <a href="<?= route('admin.export') ?>" class="btn btn-outline-primary btn-sm">Sauvegarde</a>
                                         <form action="<?= route('admin.system.purge-tmp') ?>" method="POST"
-                                              onsubmit="return confirm('Purger tous les fichiers temporaires de storage/tmp ?');">
+                                              data-confirm="Purger tous les fichiers temporaires de storage/tmp ?">
                                             <?= csrf_field() ?>
                                             <button type="submit" class="btn btn-outline-danger btn-sm w-100">
                                                 Purger storage/tmp<?= (int) $tmp_count > 0 ? ' (' . (int) $tmp_count . ')' : '' ?>
