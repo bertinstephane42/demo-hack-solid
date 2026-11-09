@@ -57,32 +57,7 @@ class RateLimitMiddleware implements Middleware
 
     protected function getClientIp(Request $request): string
     {
-        $remote = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-
-        // On ne fait confiance aux en-têtes (X-Forwarded-For, X-Real-IP,
-        // CF-Connecting-IP) QUE si l'adresse TCP réelle est privée/réservée
-        // (cas d'un reverse proxy en amont, ex. LWS). Sinon un visiteur
-        // pourrait réinitialiser son quota en falsifiant ces en-têtes.
-        $isProxy = filter_var(
-            $remote,
-            FILTER_VALIDATE_IP,
-            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-        ) === false;
-
-        if ($isProxy) {
-            foreach (['HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'HTTP_CF_CONNECTING_IP'] as $header) {
-                $value = $_SERVER[$header] ?? '';
-                if ($value) {
-                    $ip = str_contains($value, ',') ? explode(',', $value)[0] : $value;
-                    $ip = trim($ip);
-                    if (filter_var($ip, FILTER_VALIDATE_IP)) {
-                        return $ip;
-                    }
-                }
-            }
-        }
-
-        return $remote;
+        return \Core\Request::clientIp();
     }
 
     /**
