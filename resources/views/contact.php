@@ -53,7 +53,7 @@
                     <label for="copyEmailInput">Votre mail (pour la copie)</label>
                 </div>
                 <div class="text-center">
-                    <button type="submit" class="btn-cta">Envoyer le message</button>
+                    <button type="submit" class="btn-cta btn-lg">Envoyer le message</button>
                 </div>
             </form>
         </div>

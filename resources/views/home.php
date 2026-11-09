@@ -12,9 +12,9 @@
                     <div class="tech-chip" title="Windows"><div class="tech-icon">Win</div><small>Windows</small></div>
                 </div>
                 <div class="mt-4 d-flex gap-3">
-                    <a class="btn btn-cta btn-lg" id="visitBtn">Accéder au DokuWiki</a>
-                    <a class="btn btn-outline-secondary btn-lg" id="btnPlan">Plan du site</a>
-                    <a class="btn btn-outline-secondary btn-lg" id="openSchemaBtn">Infrastructure</a>
+                    <a class="btn btn-cta btn-lg" id="visitBtn" href="/bts_sio/doku.php/start">Accéder au DokuWiki</a>
+                    <a class="btn btn-outline-secondary btn-lg" id="btnPlan" href="<?= route('sitemap') ?>">Plan du site</a>
+                    <a class="btn btn-outline-secondary btn-lg" id="openSchemaBtn" href="#">Infrastructure</a>
                 </div>
                 <p class="mt-3 small text-muted">Site protégé par CloudFlare. Les applications pédagogiques sont servies via un proxy PHP pour isoler les environnements de TP.</p>
             </div>
@@ -78,7 +78,7 @@
             <div class="card mt-3 p-3">
                 <h6>Statut</h6>
                 <p class="small text-muted">Proxy applicatif en place — sessions isolées pour travaux pratiques. CloudFlare filtre les attaques et sert le contenu statique.</p>
-                <div class="progress" style="height:10px; cursor:pointer;"><div class="progress-bar" role="progressbar" style="width:72%"></div></div>
+                <div class="progress" style="height:10px;"><div class="progress-bar" role="progressbar" style="width:72%"></div></div>
             </div>
         </aside>
     </div>
