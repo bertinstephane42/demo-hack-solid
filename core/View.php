@@ -114,9 +114,13 @@ class View
 
         $contents = $this->compileDirectives($contents);
 
-        $tempFile = sys_get_temp_dir() . '/view_' . md5($contents . microtime(true)) . '.php';
+        // Nom déterministe basé sur le contenu : le fichier compilé reste stable
+        // entre les requêtes, ce qui permet à OPcache de réutiliser le bytecode.
+        $tempFile = sys_get_temp_dir() . '/view_' . md5($contents) . '.php';
 
-        file_put_contents($tempFile, $contents);
+        if (!is_file($tempFile)) {
+            file_put_contents($tempFile, $contents, LOCK_EX);
+        }
 
         ob_start();
 
@@ -132,10 +136,6 @@ class View
         $output = ob_get_clean();
 
         $this->sections = array_merge($this->sections, $__sections);
-
-        if (file_exists($tempFile)) {
-            @unlink($tempFile);
-        }
 
         return $output;
     }
