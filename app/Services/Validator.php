@@ -73,10 +73,10 @@ class Validator
             return;
         }
 
-        $domain = substr(strrchr($value, '@'), 1);
-        if (!checkdnsrr($domain, 'MX')) {
-            $this->addError($field, "Le domaine de l'email n'est pas valide.");
-        }
+        // Pas de vérification DNS synchrone : latence/blocage possibles,
+        // et un domaine valide sans enregistrement MX (mais avec un A) serait
+        // rejeté à tort. La validation de syntaxe ci-dessus suffit ; les autres
+        // couches (captcha, rate-limit, honeypot) filtrent les abus.
     }
 
     protected function addError(string $field, string $message): void
