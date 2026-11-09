@@ -31,13 +31,8 @@ class ApiController extends Controller
             exit;
         }
 
-        $token = $_SERVER['HTTP_X_PUBLIC_TOKEN'] ?? '';
-        $expected = config('api.public_token', '');
-        if ($token !== $expected) {
-            Response::json(['error' => 'Invalid token'], 403)->send();
-            exit;
-        }
-
+        // Données publiques, déjà affichées sur la page d'accueil : aucune
+        // authentification n'est requise (un jeton en JS public est inutile).
         Response::json($this->data)->send();
         exit;
     }
