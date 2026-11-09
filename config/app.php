@@ -1,8 +1,8 @@
 <?php
 return [
     'name' => env('APP_NAME', 'cours-reseaux'),
-    'env' => env('APP_ENV', 'development'),
-    'debug' => env('APP_DEBUG', true),
+    'env' => env('APP_ENV', 'production'),
+    'debug' => env('APP_DEBUG', false),
     'url' => env('APP_URL', 'http://localhost'),
     'providers' => [
         App\Providers\AppServiceProvider::class,
