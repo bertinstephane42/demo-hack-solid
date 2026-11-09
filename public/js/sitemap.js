@@ -10,7 +10,7 @@
         return;
     }
 
-    const historyStack = [];
+    let currentState = { level: 'categories' };
 
     function itemUrl(item) {
         return item && typeof item.url === 'string' ? item.url.trim() : '';
@@ -30,6 +30,56 @@
             return 'item-site';
         }
         return 'item-external';
+    }
+
+    function hasKey(object, key) {
+        return Object.prototype.hasOwnProperty.call(object || {}, key);
+    }
+
+    function sameState(a, b) {
+        return a.level === b.level && a.key === b.key && a.parent === b.parent;
+    }
+
+    function stateToHash(state) {
+        if (state.level === 'subcategories') {
+            return '#' + encodeURIComponent(state.key);
+        }
+        if (state.level === 'items') {
+            return '#' + encodeURIComponent(state.parent) + '/' + encodeURIComponent(state.key);
+        }
+        return '';
+    }
+
+    function parseHash(hash) {
+        const raw = String(hash || '').replace(/^#/, '');
+
+        if (!raw) {
+            return { level: 'categories' };
+        }
+
+        let parts;
+
+        try {
+            parts = raw.split('/').map(function (part) {
+                return decodeURIComponent(part);
+            });
+        } catch (error) {
+            return null;
+        }
+
+        if (parts.length === 1) {
+            return hasKey(siteMenu, parts[0]) ? { level: 'subcategories', key: parts[0] } : null;
+        }
+
+        if (parts.length === 2) {
+            const subcategories = (siteMenu[parts[0]] || {}).subcategories || {};
+
+            return hasKey(siteMenu, parts[0]) && hasKey(subcategories, parts[1])
+                ? { level: 'items', parent: parts[0], key: parts[1] }
+                : null;
+        }
+
+        return null;
     }
 
     function makeButton(label, className, dataset, disabled) {
@@ -166,7 +216,7 @@
 
     function renderMenu(level, key, parent, moveFocus) {
         container.innerHTML = '';
-        backBtn.hidden = historyStack.length === 0;
+        backBtn.hidden = level === 'categories';
         updateTitle(level, key, parent);
 
         if (level === 'categories') {
@@ -186,6 +236,45 @@
         }
     }
 
+    function applyState(state, moveFocus) {
+        currentState = state;
+        renderMenu(state.level, state.key, state.parent, moveFocus);
+    }
+
+    function navigate(state) {
+        if (sameState(state, currentState)) {
+            return;
+        }
+
+        const hash = stateToHash(state);
+        const url = window.location.pathname + window.location.search + hash;
+
+        window.history.pushState(null, '', url);
+        applyState(state, true);
+    }
+
+    function parentState(state) {
+        if (state.level === 'items') {
+            return { level: 'subcategories', key: state.parent };
+        }
+
+        return { level: 'categories' };
+    }
+
+    function syncFromLocation() {
+        const state = parseHash(window.location.hash);
+
+        if (!state) {
+            window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            applyState({ level: 'categories' }, true);
+            return;
+        }
+
+        if (!sameState(state, currentState)) {
+            applyState(state, true);
+        }
+    }
+
     container.addEventListener('click', function (event) {
         const button = event.target.closest('button.feature-card');
 
@@ -194,24 +283,18 @@
         }
 
         if (button.dataset.type === 'category') {
-            historyStack.push({ level: 'categories' });
-            renderMenu('subcategories', button.dataset.key, null, true);
+            navigate({ level: 'subcategories', key: button.dataset.key });
         } else if (button.dataset.type === 'subcategory') {
-            historyStack.push({ level: 'subcategories', key: button.dataset.parent });
-            renderMenu('items', button.dataset.key, button.dataset.parent, true);
+            navigate({ level: 'items', parent: button.dataset.parent, key: button.dataset.key });
         }
     });
 
     backBtn.addEventListener('click', function () {
-        const previous = historyStack.pop();
-
-        if (!previous) {
-            renderMenu('categories', null, null, true);
-            return;
-        }
-
-        renderMenu(previous.level, previous.key, previous.parent, true);
+        navigate(parentState(currentState));
     });
+
+    window.addEventListener('popstate', syncFromLocation);
+    window.addEventListener('hashchange', syncFromLocation);
 
     function animateFloatingBackground() {
         const floats = [document.getElementById('float1'), document.getElementById('float2')];
@@ -245,6 +328,14 @@
         requestAnimationFrame(animate);
     }
 
-    renderMenu('categories');
+    const initialState = parseHash(window.location.hash);
+
+    if (initialState) {
+        applyState(initialState, false);
+    } else {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        applyState({ level: 'categories' }, false);
+    }
+
     animateFloatingBackground();
 })();
