@@ -196,23 +196,42 @@ class Request
         return $this->url();
     }
 
-    public function ip(): string
+    /**
+     * Résout l'IP client de façon sûre : on ne fait confiance aux en-têtes
+     * (X-Forwarded-For, X-Real-IP, CF-Connecting-IP) que si l'adresse TCP
+     * réelle (REMOTE_ADDR) est privée/réservée (cas d'un reverse proxy).
+     * Sinon un visiteur pourrait falsifier son IP et contourner le throttle.
+     */
+    public static function clientIp(?array $server = null): string
     {
-        $headers = ['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR'];
+        $server = $server ?? $_SERVER;
+        $remote = $server['REMOTE_ADDR'] ?? '0.0.0.0';
 
-        foreach ($headers as $header) {
-            if (!empty($_SERVER[$header])) {
-                $ip = $_SERVER[$header];
-                if (str_contains($ip, ',')) {
-                    $ip = trim(explode(',', $ip)[0]);
-                }
-                if (filter_var($ip, FILTER_VALIDATE_IP)) {
-                    return $ip;
+        $isProxy = filter_var(
+            $remote,
+            FILTER_VALIDATE_IP,
+            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+        ) === false;
+
+        if ($isProxy) {
+            foreach (['HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'HTTP_CF_CONNECTING_IP'] as $header) {
+                $value = $server[$header] ?? '';
+                if ($value) {
+                    $ip = str_contains($value, ',') ? explode(',', $value)[0] : $value;
+                    $ip = trim($ip);
+                    if (filter_var($ip, FILTER_VALIDATE_IP)) {
+                        return $ip;
+                    }
                 }
             }
         }
 
-        return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        return $remote;
+    }
+
+    public function ip(): string
+    {
+        return self::clientIp($_SERVER);
     }
 
     public function userAgent(): string
