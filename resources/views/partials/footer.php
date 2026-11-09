@@ -6,6 +6,7 @@
         </div>
         <div class="text-end">
             <small class="text-muted">Hébergement sécurisé • CloudFlare • Proxy PHP</small>
+<small class="text-muted" style="opacity:.35;font-size:.7rem;display:block;margin-top:.25rem;"><a href="<?= route('admin.login') ?>" class="text-muted text-decoration-none">admin</a></small>
         </div>
     </div>
         <canvas id="fireworks-canvas" style="position:fixed;bottom:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
