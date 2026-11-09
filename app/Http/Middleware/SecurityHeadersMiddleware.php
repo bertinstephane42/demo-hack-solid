@@ -14,6 +14,10 @@ class SecurityHeadersMiddleware implements Middleware
         $csp = $security['csp'] ?? [];
 
         foreach ($headers as $name => $value) {
+            // HSTS n'a de sens qu'en HTTPS : ne jamais l'envoyer en clair.
+            if ($name === 'Strict-Transport-Security' && !$request->isSecure()) {
+                continue;
+            }
             header("{$name}: {$value}");
         }
 
