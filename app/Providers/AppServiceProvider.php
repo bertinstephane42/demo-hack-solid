@@ -63,7 +63,7 @@ class AppServiceProvider extends ServiceProvider
                 'lifetime' => 0,
                 'path' => '/',
                 'domain' => '',
-                'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+                'secure' => (new \Core\Request())->isSecure(),
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);
