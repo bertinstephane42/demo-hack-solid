@@ -62,7 +62,12 @@ class SitemapMenu
 
     public function toJson(): string
     {
-        return json_encode($this->menu, JSON_UNESCAPED_UNICODE);
+        $json = json_encode(
+            $this->menu,
+            JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+        );
+
+        return $json === false ? '{}' : $json;
     }
 
     protected function load(): array
@@ -124,18 +129,21 @@ class SitemapMenu
                     ],
                 ],
                 'items' => [
-                    ['url' => 'https://cours-reseaux.fr/bts_sio/doku.php/cours:progression:bts2:infos', 'label' => 'Informations techniques'],
+                    ['url' => 'https://cours-reseaux.fr/bts_sio/doku.php/cours:progression:bts1:infos', 'label' => 'Informations techniques'],
                     ['url' => 'https://cours-reseaux.fr/bts_sio/doku.php/cours:progression:bts2:evenements', 'label' => 'Evenements importants'],
                 ],
             ],
             'Bachelor CPI' => [
                 'items' => [
                     ['url' => 'https://cours-reseaux.fr/bts_sio/doku.php/cours:bachelor:menu', 'label' => 'Cours de Bachelor'],
+					['url' => 'https://cours-reseaux.fr/projet-scrum/projet_scrum.html', 'label' => 'Projet Scrum'],
+					['url' => 'https://cours-reseaux.fr/workflow-it/workflow.php', 'label' => 'Workflow-IT'],
                 ],
             ],
             'Master e2i' => [
                 'items' => [
                     ['url' => 'https://cours-reseaux.fr/bts_sio/doku.php/cours:master:menu', 'label' => 'Cours de Master'],
+					['url' => 'https://cours-reseaux.fr/itil-game/index.php', 'label' => 'ITIL Game'],
                 ],
             ],
             'Boîte à outils' => [
@@ -154,11 +162,6 @@ class SitemapMenu
                             ['url' => 'https://cours-reseaux.fr/vimmaster/index.html', 'label' => 'Se former à Vim'],
                         ],
                     ],
-                    'Audit du code' => [
-                        'items' => [
-                            ['url' => 'https://cours-reseaux.fr/check-php/index.php', 'label' => 'Audit de sécurité PHP'],
-                        ],
-                    ],
                     'Créer des rapports' => [
                         'items' => [
                             ['url' => 'https://cours-reseaux.fr/mdwriter/public/login.php', 'label' => 'mdWriter'],
@@ -168,6 +171,12 @@ class SitemapMenu
                         'items' => [
                             ['url' => 'https://cours-reseaux.fr/excalidrawjs', 'label' => 'ExcalidrawJS'],
                             ['url' => 'https://cours-reseaux.fr/bts_sio/doku.php/bts1:cours:excalidraw', 'label' => 'Info excalidrawJS'],
+                        ],
+                    ],
+					'Développement' => [
+                        'items' => [
+                            ['url' => 'https://cours-reseaux.fr/check-php/index.php', 'label' => 'Audit de sécurité PHP'],
+							['url' => 'https://cours-reseaux.fr/obfuscator-js/index.html', 'label' => 'Obfuscator JS'],
                         ],
                     ],
                     'Documentation' => [
