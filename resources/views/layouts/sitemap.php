@@ -35,7 +35,7 @@
     <footer class="bg-light py-4 border-top">
         <div class="container d-flex justify-content-between align-items-center">
             <div>
-                <a href="https://www.linkedin.com/in/stephane-bertin-cfai/" target="_blank" rel="noopener noreferrer">
+                <a href="https://www.linkedin.com/in/stephane-bertin42/" target="_blank" rel="noopener noreferrer">
                     <strong>Stéphane BERTIN</strong>
                 </a><br>
                 <small class="text-muted">&copy; <?= $year ?? date('Y') ?> — Ressources pédagogiques informatiques</small>
@@ -49,6 +49,6 @@
         window.APP_PATH = '<?= rtrim(asset(''), '/') ?>';
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="<?= asset('js/index.js') ?>"></script>
+    <script src="<?= asset('js/sitemap.js') ?>"></script>
 </body>
 </html>
