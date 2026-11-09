@@ -12,25 +12,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('css/index.css') ?>">
-    <style>
-    body {
-        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-        background: linear-gradient(180deg, #eef4fa 0%, #f7faff 100%);
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-    footer {
-        margin-top: auto;
-    }
-    </style>
 </head>
-<body>
+<body class="d-flex flex-column">
     @include('partials.floating-bg')
     <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
         <div class="container d-flex align-items-center justify-content-between">
-            <a class="navbar-brand d-flex align-items-center gap-3">
-                <span class="logo-mark position-relative">CN</span>
+            <a href="<?= route('home') ?>" class="navbar-brand d-flex align-items-center gap-3">
+                <span class="logo-mark position-relative">CR</span>
                 <div class="d-none d-md-block">
                     <div style="font-weight:700">Contactez-nous</div>
                     <small class="text-muted">Nous répondons rapidement aux étudiants et formateurs.</small>
@@ -45,7 +33,7 @@
     <footer class="bg-light py-4 border-top">
         <div class="container d-flex justify-content-between align-items-center">
             <div>
-                <span id="linkedin-name" class="linkedin-profile"><strong>Stéphane BERTIN</strong></span><br>
+                <a href="https://www.linkedin.com/in/stephane-bertin42/" target="_blank" rel="noopener noreferrer"><strong>Stéphane BERTIN</strong></a><br>
                 <small class="text-muted">&copy; <?= $year ?? date('Y') ?> — Ressources pédagogiques informatiques</small>
             </div>
             <div class="text-end">
@@ -53,17 +41,7 @@
             </div>
         </div>
     </footer>
-    <script>
-        (function () {
-            var parts = ["s", "t", "e", "p", "h", "a", "n", "e", "-", "b", "e", "r", "t", "i", "n", "4", "2"];
-            var el = document.getElementById("linkedin-name");
-            if (el) {
-                var username = parts.join("");
-                el.innerHTML = '<a href="https://www.linkedin.com/in/' + username + '/" target="_blank" rel="noopener noreferrer"><strong>Stéphane BERTIN</strong></a>';
-            }
-        })();
-    </script>
-    <script>
+        <script>
         document.addEventListener("DOMContentLoaded", () => {
             const alertBox = document.querySelector(".alert-success, .alert-danger");
             if (alertBox) {

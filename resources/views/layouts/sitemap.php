@@ -17,8 +17,8 @@
     @include('partials.floating-bg')
     <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
         <div class="container d-flex align-items-center justify-content-between">
-            <a class="navbar-brand d-flex align-items-center gap-3">
-                <span class="logo-mark position-relative">PS</span>
+            <a href="<?= route('home') ?>" class="navbar-brand d-flex align-items-center gap-3">
+                <span class="logo-mark position-relative">CR</span>
                 <div class="d-none d-md-block">
                     <div style="font-weight:700">Plan du site cours-reseaux.fr</div>
                     <small class="text-muted">Cliquez sur un bouton pour naviguer dans le plan du site</small>
