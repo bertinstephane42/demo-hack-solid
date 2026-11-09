@@ -18,11 +18,13 @@ class LogReader
     protected const FILES = [
         'login' => 'login.log',
         'contact' => 'contact.log',
+        'sitemap' => 'sitemap.log',
     ];
 
     protected const LABELS = [
         'login' => 'Journal de connexion',
         'contact' => 'Messages de contact',
+        'sitemap' => 'Consultations du plan du site',
     ];
 
     /** Résultats de connexion considérés comme des réussites. */
@@ -171,6 +173,26 @@ class LogReader
     }
 
     /**
+     * Statistiques du journal des consultations du plan du site :
+     * nombre total de visites et répartition par jour (pourcentages).
+     *
+     * @return array{total:int, days:array<string,int>}
+     */
+    public function sitemapCounts(array $entries): array
+    {
+        $days = [];
+        foreach ($entries as $entry) {
+            $day = substr((string) ($entry['time'] ?? ''), 0, 10);
+            if ($day === '') {
+                continue;
+            }
+            $days[$day] = ($days[$day] ?? 0) + 1;
+        }
+        krsort($days);
+        return ['total' => count($entries), 'days' => $days];
+    }
+
+    /**
      * Vide entièrement le fichier du journal demandé.
      */
     public function clear(string $tab): bool
@@ -234,6 +256,9 @@ class LogReader
         if ($tab === 'login') {
             return $this->parseLogin($line);
         }
+        if ($tab === 'sitemap') {
+            return $this->parseSitemap($line);
+        }
         return $this->parseContact($line);
     }
 
@@ -259,6 +284,37 @@ class LogReader
             'email' => '',
             'result' => 'inconnu',
             'extra' => $line,
+        ];
+    }
+
+    protected function parseSitemap(string $line): array
+    {
+        $time = '';
+        $body = $line;
+        if (preg_match('/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (.*)$/', $line, $m) === 1) {
+            $time = $m[1];
+            $body = $m[2];
+        }
+
+        $ip = '';
+        $ua = '';
+        $ref = '';
+        if (preg_match('/\bip=(\S+)/', $body, $m) === 1) {
+            $ip = $m[1];
+        }
+        if (preg_match('/\bua="([^"]*)"/', $body, $m) === 1) {
+            $ua = $m[1];
+        }
+        if (preg_match('/\bref="([^"]*)"/', $body, $m) === 1) {
+            $ref = $m[1];
+        }
+
+        return [
+            'tab' => 'sitemap',
+            'time' => $time,
+            'ip' => $ip,
+            'ua' => $ua,
+            'ref' => $ref,
         ];
     }
 
