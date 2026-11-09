@@ -17,8 +17,13 @@ $total_all = (int) ($total_all ?? $total);
     <div class="col-lg-11">
         <h2 class="h4 fw-bold mb-1" style="color:#003878;">Journaux</h2>
         <p class="text-muted small mb-4">
-            Connexions à l'administration et messages envoyés depuis la page de contact,
-            du plus récent au plus ancien.
+            <?php if ($current === 'login'): ?>
+                Connexions à l'administration, du plus récent au plus ancien.
+            <?php elseif ($current === 'contact'): ?>
+                Messages envoyés depuis la page de contact, du plus récent au plus ancien.
+            <?php else: ?>
+                Consultations du plan du site, du plus récent au plus ancien.
+            <?php endif; ?>
             Les fichiers sont stockés dans <code>storage/logs</code> (dossier protégé, inaccessible depuis le web).
         </p>
 
@@ -73,6 +78,50 @@ $total_all = (int) ($total_all ?? $total);
                     </div>
                 </div>
             </div>
+        <?php elseif ($current === 'sitemap'): ?>
+            <div class="row g-3 mb-4">
+                <div class="col-sm-4">
+                    <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                            <div class="fs-4 fw-bold" style="color:#003878;"><?= (int) $sitemap_total ?></div>
+                            <div class="text-muted small">Visites du plan du site</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                            <div class="fs-4 fw-bold"><?= count($sitemap_days) ?></div>
+                            <div class="text-muted small">Jours avec visites</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card border-0 shadow-sm text-center">
+                        <div class="card-body">
+                            <div class="fs-4 fw-bold"><?= $sitemap_total > 0 ? round(100 * (max($sitemap_days ?: [0]) / $sitemap_total), 1) : 0 ?>%</div>
+                            <div class="text-muted small">Pic journalier (% du total)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php if (!empty($sitemap_days)): ?>
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3" style="color:#003878;">Visites par jour</h6>
+                        <?php foreach ($sitemap_days as $day => $count): ?>
+                            <?php $pct = $sitemap_total > 0 ? (int) round(100 * $count / $sitemap_total) : 0; ?>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <span class="small text-nowrap" style="min-width:90px;"><?= htmlspecialchars($day) ?></span>
+                                <div class="progress flex-grow-1" style="height:18px;">
+                                    <div class="progress-bar" role="progressbar" style="width:<?= $pct ?>%;"><?= (int) $count ?></div>
+                                </div>
+                                <span class="small text-muted" style="min-width:42px;"><?= $pct ?>%</span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
         <?php else: ?>
             <div class="row g-3 mb-4">
                 <div class="col-sm-4">
@@ -166,6 +215,39 @@ $total_all = (int) ($total_all ?? $total);
                                         <td class="small"><?= htmlspecialchars($entry['ip'] !== '' ? $entry['ip'] : '—') ?></td>
                                         <td class="small"><?= htmlspecialchars($entry['email'] !== '' ? $entry['email'] : '—') ?></td>
                                         <td class="small text-muted"><?= htmlspecialchars($entry['extra'] !== '' ? $entry['extra'] : '—') ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php elseif ($current === 'sitemap'): ?>
+                    <div class="table-responsive">
+                        <table class="table table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Adresse IP</th>
+                                    <th>Navigateur</th>
+                                    <th>Référent</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($entries as $entry): ?>
+                                    <tr>
+                                        <td class="text-nowrap small"><?= htmlspecialchars($entry['time'] !== '' ? $entry['time'] : '—') ?></td>
+                                        <td class="small"><?= htmlspecialchars($entry['ip'] !== '' ? $entry['ip'] : '—') ?></td>
+                                        <td class="small text-muted" style="max-width:320px;">
+                                            <span class="d-inline-block text-truncate" style="max-width:100%;"
+                                                  title="<?= htmlspecialchars($entry['ua'] ?? '', ENT_QUOTES) ?>">
+                                                <?= htmlspecialchars($entry['ua'] !== '' ? $entry['ua'] : '—') ?>
+                                            </span>
+                                        </td>
+                                        <td class="small text-muted" style="max-width:260px;">
+                                            <span class="d-inline-block text-truncate" style="max-width:100%;"
+                                                  title="<?= htmlspecialchars($entry['ref'] ?? '', ENT_QUOTES) ?>">
+                                                <?= htmlspecialchars($entry['ref'] !== '' ? $entry['ref'] : '—') ?>
+                                            </span>
+                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
