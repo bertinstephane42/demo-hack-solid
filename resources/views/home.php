@@ -47,7 +47,7 @@
         </div>
     </div>
 </header>
-<main class="container my-5">
+<section class="container my-5">
     <div class="row mt-5 mb-5">
         <div class="col-md-4"><div class="card feature-card p-3" style="background:#f8f9fa; color:#212529; padding-bottom:20px;"><h6><strong>DevOps & CI</strong></h6><p class="small text-muted" style="color:#495057;">Pipelines, conteneurs, intégration continue et pratiques d'automatisation.</p></div></div>
         <div class="col-md-4"><div class="card feature-card p-3" style="background:#f8f9fa; color:#212529;"><h6><strong>Administration Systèmes</strong></h6><p class="small text-muted">Linux, Windows Server, scripting, supervision, dépannage et gestion des utilisateurs.</p></div></div>
@@ -82,4 +82,4 @@
             </div>
         </aside>
     </div>
-</main>
+</section>
