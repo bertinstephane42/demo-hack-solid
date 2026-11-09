@@ -495,14 +495,20 @@ class AdminController extends Controller
         $countFail = 0;
         $countSent = 0;
         $countFailed = 0;
+        $sitemapTotal = 0;
+        $sitemapDays = [];
         if ($current === 'login') {
             $counts = $reader->loginCounts($all);
             $countSuccess = $counts['success'];
             $countFail = $counts['fail'];
-        } else {
+        } elseif ($current === 'contact') {
             $counts = $reader->contactCounts($all);
             $countSent = $counts['sent'];
             $countFailed = $counts['failed'];
+        } elseif ($current === 'sitemap') {
+            $counts = $reader->sitemapCounts($all);
+            $sitemapTotal = $counts['total'];
+            $sitemapDays = $counts['days'];
         }
 
         $rt = $current === 'login' ? (string) $request->query('rt', '') : '';
@@ -542,6 +548,8 @@ class AdminController extends Controller
             'count_fail' => $countFail,
             'count_sent' => $countSent,
             'count_failed' => $countFailed,
+            'sitemap_total' => $sitemapTotal,
+            'sitemap_days' => $sitemapDays,
             'total_all' => $totalAll,
             'filter_rt' => $rt,
             'success' => $success,
